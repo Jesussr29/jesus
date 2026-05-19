@@ -1,0 +1,84 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* Fondo */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #007bff, #6610f2);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Título */
+h2 {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+/* Inputs */
+input {
+  width: 280px;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+}
+
+/* Focus */
+input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+/* Botón */
+button {
+  width: 280px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffc107;
+  color: #212529;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Hover */
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Error */
+#error {
+  margin-top: 15px;
+  color: #ffdddd;
+  font-size: 14px;
+}
+
+/* Enlace a login */
+.login-link {
+  margin-top: 15px;
+  color: white;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: #ffc107;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}

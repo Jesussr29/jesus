@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amigos</title>
+    <link rel="stylesheet" href="./css/friends.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="./img/ico.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="./img/ico.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+</head>
+
+<body>
+
+    <main class="contenedor-amigos">
+
+        <button class="btn-volver" onclick="window.location.href='index.html'">
+            ← Volver
+        </button>
+
+        <!-- BUSCAR AMIGOS -->
+        <section class="bloque">
+            <h2>Buscar amigos</h2>
+            <div class="buscador">
+                <input type="text" id="buscarUsuario" placeholder="Nombre de usuario">
+                <button id="btnBuscar">Buscar</button>
+            </div>
+
+            <div id="resultadosBusqueda"></div>
+        </section>
+
+        <!-- BOTÓN MODAL -->
+        <button id="btnSolicitudes" class="btn-solicitudes">
+            Solicitudes de amistad
+        </button>
+
+        <!-- LISTA DE AMIGOS -->
+        <section class="bloque" id="misAmigos">
+            <h2>Ranking amigos</h2>
+            <div id="listaAmigos"></div>
+        </section>
+
+        <!-- FOOTER DE ACCIONES -->
+
+        <footer class="footer-juego">
+            <a href="./index.html" class="item-footer">
+                <i class="fa-solid fa-house"></i>
+                <span>Inicio</span>
+            </a>
+
+            <a href="./friends.html" class="item-footer activo">
+                <i class="fa-solid fa-user-group"></i>
+                <span>Amigos</span>
+            </a>
+
+            <a href="./perfil.html" class="item-footer">
+                <i class="fa-solid fa-user"></i>
+                <span>Perfil</span>
+            </a>
+        </footer>
+
+
+    </main>
+
+    <!-- MODAL SOLICITUDES -->
+    <div id="modalSolicitudes" class="modal">
+        <div class="modal-contenido">
+            <span id="cerrarModal" class="cerrar">&times;</span>
+            <h2>Solicitudes de amistad</h2>
+
+            <!-- Más solicitudes -->
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMACIÓN ELIMINAR -->
+    <div id="modal-eliminar" class="modal-eliminar">
+        <div class="modal-eliminar-contenido">
+            <p id="texto-eliminar">¿Estás seguro?</p>
+            <div class="acciones-eliminar">
+                <button id="btn-cancelar-eliminar">Cancelar</button>
+                <button id="btn-confirmar-eliminar">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="./js/friends.js"></script>
+</body>
+
+</html>

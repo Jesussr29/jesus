@@ -1,0 +1,689 @@
+/* ==========================
+   RESET BÁSICO
+========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: #1212128e;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  overflow-x: hidden;
+}
+/* ==========================
+   CABECERA FIJA MÁS GRANDE
+========================== */
+#cabecera {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 40px;  /* más grande */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  z-index: 100;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  font-size: 18px; /* aumenta tamaño de texto */
+}
+
+#btn-ajustes, #btn-amigos {
+    align-items: center;
+    gap: 8px;          /* espacio entre icono y texto */
+    padding: 8px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #475EA1;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#btn-ajustes:hover, #btn-amigos:hover {
+    background-color: #475EA1;
+    transform: scale(1.05);
+}
+
+#btn-ajustes i, #btn-amigos i {
+    font-size: 22px;   /* tamaño del icono */
+}
+
+.btn-usuario {
+    display: flex;
+    gap: 15px;         /* espacio entre botones */
+}
+
+/* Contenedor de vidas más grande */
+#vidas {
+    display: flex;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #fce4ec; /* color de fondo suave */
+    padding: 10px 20px; /* más grande */
+    border-radius: 25px;
+    gap: 15px;
+    font-size: 18px; /* tamaño del texto */
+}
+
+/* Corazón más grande */
+#contador-vidas {
+    position: relative;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background-color: #ff4d4d; /* rojo del corazón */
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    line-height: 25px;
+    font-size: 20px;
+    transform: rotate(-45deg);
+    margin-top: 3px;
+}
+
+.nvidas{
+    position: absolute;
+    margin-left: 6px;
+    margin-bottom: 5px;
+    font-size: 25px;
+}
+
+/* Partes del corazón */
+#contador-vidas::before,
+#contador-vidas::after {
+    content: "";
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background-color: #ff4d4d;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+#contador-vidas::before {
+    top: -12.5px;
+    left: 0;
+}
+
+#contador-vidas::after {
+    top: 0;
+    left: 12.5px;
+}
+
+/* Texto "Full" al lado de vidas */
+#vidas span:last-child {
+    color: #6c3483; /* morado */
+    font-weight: bold;
+    font-size: 16px;
+}
+
+
+
+/* ==========================
+   MAIN
+========================== */
+main {
+  margin-top: 100px; /* espacio para cabecera fija */
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ==========================
+   TITULO
+========================== */
+h1 {
+  margin-bottom: 30px;
+  font-size: 28px;
+  color: #333;
+  text-align: center;
+}
+
+/* ==========================
+   CAMINO DE NIVELES
+========================== */
+#camino-niveles {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse; /* de abajo hacia arriba */
+  align-items: center;
+  gap: 60px;
+}
+
+.nivel {
+  width: 70px;
+  height: 60px;
+  position: absolute;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #fff;
+  clip-path: polygon(
+    25% 0%, 75% 0%, 
+    100% 50%, 75% 100%, 
+    25% 100%, 0% 50%
+  );
+  position: relative;
+}
+
+
+
+/* ----------------------------
+   ESTADOS
+---------------------------- */
+
+/* Completado */
+.nivel.completado::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  clip-path: inherit;
+  background: linear-gradient(145deg, #3cb371, #2e8b57); /* verde moderno */
+  box-shadow: 
+    inset 0 2px 5px rgba(255,255,255,0.5),
+    inset 0 -2px 5px rgba(0,0,0,0.2),
+    0 0 6px rgba(0,180,255,0.3); /* brillo azul suave */
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.nivel.completado:hover::before {
+  box-shadow: 
+    inset 0 3px 6px rgba(255,255,255,0.6),
+    inset 0 -3px 6px rgba(0,0,0,0.25),
+    0 0 10px rgba(0,180,255,0.4);
+}
+
+/* Actual */
+
+.nivel.actual::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  clip-path: inherit;
+  background: linear-gradient(145deg, #ffdd59, #ffc107); /* amarillo dorado */
+  box-shadow: 
+    inset 0 4px 8px rgba(255,255,255,0.6),
+    inset 0 -4px 8px rgba(0,0,0,0.35),
+    0 0 14px rgba(0,180,255,0.7); /* brillo azul más fuerte */
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.nivel.actual:hover::before {
+  box-shadow: 
+    inset 0 6px 10px rgba(255,255,255,0.7),
+    inset 0 -6px 10px rgba(0,0,0,0.4),
+    0 0 20px rgba(0,180,255,0.9);
+}
+
+/* Bloqueado */
+.nivel.bloqueado::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  clip-path: inherit;
+  background: linear-gradient(145deg, #ccc, #999); /* gris apagado */
+  box-shadow: 
+    inset 0 1px 2px rgba(255,255,255,0.3),
+    inset 0 -1px 2px rgba(0,0,0,0.15),
+    0 0 0 rgba(0,180,255,0); /* sin brillo */
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.nivel.bloqueado:hover::before {
+  /* ligeramente más visible al pasar ratón */
+  box-shadow: 
+    inset 0 2px 3px rgba(255,255,255,0.35),
+    inset 0 -2px 3px rgba(0,0,0,0.2),
+    0 0 4px rgba(0,180,255,0.1);
+}
+
+/* Números de bloqueado en negro */
+.nivel.bloqueado span {
+  color: #000;
+  text-shadow: none;
+}
+
+
+/* ==========================
+   MODAL AMIGOS
+========================== */
+
+
+/* ==========================
+   MODAL AJUSTES
+========================== */
+#modal-ajustes {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+#modal-ajustes .cerrar-ajustes {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff0000;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+#modal-ajustes .cerrar-ajustes:hover {
+  color: #ff0000; /* cambia de color al pasar el mouse */
+}
+
+
+#modal-ajustes .contenido {
+  position: relative;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  min-width: 320px;
+}
+
+
+#modal-ajustes .opcion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+/* Botón cerrar sesión */
+#btn-cerrar-sesion {
+    padding: 10px 20px;
+    font-size: 14px;
+    background: #ff4d4d;      /* Rojo para advertencia */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#btn-cerrar-sesion:hover {
+    background: #ff1a1a;
+    box-shadow: 0 2px 10px rgba(255, 0, 0, 0.4);
+}
+
+
+#modal-ajustes button.cerrar-ajustes {
+  padding: 6px 12px;
+  background: #eee;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#modal-ajustes button.cerrar-ajustes:hover {
+  background: #ddd;
+}
+
+
+/* ==========================
+   MODO OSCURO
+========================== */
+body.dark-mode {
+  background: #121212;
+  color: #eee;
+}
+
+body.dark-mode #cabecera {
+  
+  box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .nivel {
+  background: #1212128e;
+  color: #eee;
+  box-shadow: 0 2px 6px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .nivel.completado {
+  background: #388e3c;
+  color: #fff;
+}
+
+body.dark-mode .nivel.actual {
+  background: #fbc02d;
+  color: #000;
+}
+
+body.dark-mode .nivel.bloqueado {
+  background: #555;
+  color: #000000;
+}
+
+body.dark-mode #modal-amigos .contenido,
+body.dark-mode #modal-ajustes .contenido {
+  background: #1e1e1e;
+  color: #eee;
+}
+
+body.dark-mode #modal-amigos th,
+body.dark-mode #modal-ajustes th {
+  background: #333;
+  color: #fff;
+}
+
+body.dark-mode #modal-amigos td,
+body.dark-mode #modal-ajustes td {
+  background: #222;
+  color: #ccc;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../img/fondo-blanco.png");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: moverFondo 30s linear infinite;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+
+body.dark-mode::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../img/fondo.png");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: moverFondo 30s linear infinite;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+@keyframes moverFondo {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 400px 400px;
+    }
+}
+
+/* ==========================
+   MODAL BLOQUEADO
+========================== */
+
+/* Fondo del modal */
+.modal-bloqueado {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(10, 15, 30, 0.75);
+  backdrop-filter: blur(6px);
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* Contenido del modal */
+.modal-bloqueado-contenido {
+  background: linear-gradient(145deg, #1e3c72, #2a5298);
+  padding: 30px 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+  position: relative;
+  animation: subir 0.4s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 2px solid #ffd700;
+}
+
+/* Animación */
+@keyframes subir {
+  from { transform: translateY(-60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Título */
+.modal-bloqueado h2 {
+  color: #ffd700;
+  margin-bottom: 15px;
+  font-size: 26px;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+}
+
+/* Texto */
+.modal-bloqueado p {
+  color: #e0e6f1;
+  margin-bottom: 25px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Botón de cerrar */
+.btn-cerrar {
+  background: linear-gradient(145deg, #ffd700, #ffb700);
+  color: #1a1a1a;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.btn-cerrar:hover {
+  transform: scale(1.08);
+  background: linear-gradient(145deg, #ffea70, #ffc400);
+}
+
+/* Botón X */
+.cerrar-boton {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffd700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cerrar-boton:hover {
+  color: #ffffff;
+  transform: scale(1.2);
+}
+
+/* FOOTER TIPO JUEGO */
+
+.footer-juego {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, #1e1e2f, #141421);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+    border-top: 2px solid #2e2e4d;
+    z-index: 1000;
+}
+
+.item-footer {
+    text-decoration: none;
+    color: #aaa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    transition: 0.3s ease;
+}
+
+.item-footer i {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.item-footer:hover {
+    color: #00f2ff;
+    transform: translateY(-3px);
+}
+
+.item-footer.activo {
+    color: #00f2ff;
+}
+
+
+/* Modal de notificaciones */
+.modal-notificaciones {
+    display: none; /* oculto por defecto */
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px); /* efecto blur detrás */
+    transition: opacity 0.3s ease;
+}
+
+.modal-notificaciones-contenido {
+    background-color: #fff;
+    padding: 30px 25px;
+    border-radius: 16px;
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Modo oscuro según tu sistema */
+body.dark-mode .modal-notificaciones-contenido {
+    background-color: #1e1e1e;
+    color: #eee;
+}
+
+/* Título y texto */
+.modal-notificaciones-contenido h2 {
+    font-size: 1.5rem;
+    margin-bottom: 14px;
+    font-weight: 700;
+}
+
+.modal-notificaciones-contenido p {
+    font-size: 1rem;
+    margin-bottom: 24px;
+    line-height: 1.4;
+    color: #555;
+}
+
+body.dark-mode .modal-notificaciones-contenido p {
+    color: #ccc;
+}
+
+/* Botones */
+.botones-modal {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.botones-modal button {
+    flex: 1;
+    padding: 12px 0;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.botones-modal button:hover {
+    transform: translateY(-2px);
+}
+
+/* Botón activar */
+.btn-activar {
+    background-color: #28a745; /* verde éxito */
+    color: #fff;
+}
+
+.btn-activar:hover {
+    background-color: #218838;
+}
+
+body.dark-mode .btn-activar {
+    background-color: #388e3c; /* coincide con tu estilo dark-mode nivel completado */
+}
+
+body.dark-mode .btn-activar:hover {
+    background-color: #2e7d32;
+}
+
+/* Botón cancelar */
+.btn-cancelar {
+    background-color: #dc3545; /* rojo error */
+    color: #fff;
+}
+
+.btn-cancelar:hover {
+    background-color: #c82333;
+}
+
+body.dark-mode .btn-cancelar {
+    background-color: #555; /* similar a nivel bloqueado */
+    color: #fff;
+}
+
+body.dark-mode .btn-cancelar:hover {
+    background-color: #444;
+}
+

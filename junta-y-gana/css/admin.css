@@ -1,0 +1,422 @@
+/* ----------------------
+   RESET Y FUENTES
+---------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #1212128e;
+    color: #333;
+    padding: 20px;
+}
+
+/* ----------------------
+   TITULO
+---------------------- */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    color: #007bff;
+    font-size: 40px;
+}
+
+/* ----------------------
+   TABLA
+---------------------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #525252;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+thead {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    color: #fff;
+}
+
+thead th {
+    padding: 12px 10px;
+    font-weight: 600;
+    text-align: center;
+}
+
+tbody td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+tbody tr:nth-child(even) {
+    background: #525252;
+}
+
+/* ----------------------
+   INPUTS Y SELECTS
+---------------------- */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 90%;
+    text-align: center;
+    background-color: #292929;
+    color: white;
+}
+
+input[type="number"]{
+    max-width: 120px;
+}
+
+/* Quitar flechas en Chrome, Edge, Safari */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+input[type="email"] {
+    min-width: 150px;
+}
+
+select{
+    min-width: 130px;
+    text-align: center;
+    text-align-last: center; /* importante */
+}
+
+
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0,123,255,0.5);
+}
+
+/* ----------------------
+   BOTONES
+---------------------- */
+button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+button.guardar {
+    background-color: #28a745;
+    color: #fff;
+}
+
+button.guardar:hover {
+    background-color: #218838;
+}
+
+button.eliminar {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+button.eliminar:hover {
+    background-color: #c82333;
+}
+
+.acciones {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+
+/* ----------------------
+   SCROLL HORIZONTAL EN MOVIL
+---------------------- */
+
+.tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 100px; /* para que no lo tape el footer */
+}
+
+/* Mantener tamaño real de la tabla */
+table {
+    min-width: 1100px;
+}
+
+/* Scroll bonito */
+.tabla-contenedor::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tabla-contenedor::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 10px;
+}
+
+.tabla-contenedor::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #007bff, #00c6ff);
+    border-radius: 10px;
+}
+
+
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../img/fondo-blanco.png");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: moverFondo 30s linear infinite;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+
+body.dark-mode::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("../img/fondo.png");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: moverFondo 30s linear infinite;
+    z-index: -1;
+    opacity: 0.15;
+}
+
+body.dark-mode {
+  background: #121212;
+  color: #eee;
+}
+
+@keyframes moverFondo {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 400px 400px;
+    }
+}
+
+/* FOOTER TIPO JUEGO */
+
+.footer-juego {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, #1e1e2f, #141421);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+    border-top: 2px solid #2e2e4d;
+    z-index: 1000;
+}
+
+.item-footer {
+    text-decoration: none;
+    color: #aaa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    transition: 0.3s ease;
+}
+
+.item-footer i {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.item-footer:hover {
+    color: #00f2ff;
+    transform: translateY(-3px);
+}
+
+.item-footer.activo {
+    color: #00f2ff;
+}
+
+
+/* MENSAJES FLOTANTES */
+
+.toast-mensaje {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10000;
+}
+
+.toast-mensaje.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-mensaje.exito {
+    background-color: #28a745; /* verde */
+}
+
+.toast-mensaje.error {
+    background-color: #dc3545; /* rojo */
+}
+
+/* ============================= */
+/* MODAL MENSAJES PRO */
+/* ============================= */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.25s ease;
+}
+
+.modal-contenido {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 18px;
+    width: 380px;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.3s ease;
+}
+
+/* Título */
+.modal-contenido h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Inputs */
+
+.modal-contenido input[type="text"] {
+    background-color: white;
+}
+
+.modal-contenido input,
+.modal-contenido textarea {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    resize: none;
+}
+
+.modal-contenido textarea {
+    min-height: 80px;
+}
+
+.modal-contenido input:focus,
+.modal-contenido textarea:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    outline: none;
+}
+
+/* Botones */
+.botones-modal {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.botones-modal button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.botones-modal button:first-child {
+    background: #4f46e5;
+    color: white;
+}
+
+.botones-modal button:first-child:hover {
+    background: #4338ca;
+    transform: translateY(-2px);
+}
+
+.botones-modal button:last-child {
+    background: #e5e7eb;
+}
+
+.botones-modal button:last-child:hover {
+    background: #d1d5db;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Dark Mode */
+body.dark-mode .modal-contenido {
+    background: #1f2937;
+    color: white;
+}
+
+body.dark-mode .modal-contenido input,
+body.dark-mode .modal-contenido textarea {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: white;
+}
+
+body.dark-mode .botones-modal button:last-child {
+    background: #374151;
+    color: white;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Registro</title>
+  <link rel="stylesheet" href="register.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+  <h2>Registrate</h2>
+
+  <input type="text" id="nombre" placeholder="Nombre">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button onclick="register()">Registrarse</button>
+  <p class="login-link">
+    ¿Ya estás registrado?
+    <a href="login.html">Inicia sesión</a>
+  </p>
+
+
+  <p id="error"></p>
+
+  <script src="auth.js"></script>
+</body>
+
+</html>

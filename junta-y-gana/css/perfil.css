@@ -1,0 +1,174 @@
+/* ==========================
+   RESET BÁSICO
+========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.perfil-container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1e1e2f, #141421);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: white;
+}
+
+.perfil-container h2 {
+    margin-bottom: 30px;
+    font-size: 26px;
+}
+
+.foto-perfil {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.foto-perfil img {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #00f2ff;
+}
+
+.btn-cambiar-foto {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: #00f2ff;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-cambiar-foto:hover {
+    transform: scale(1.1);
+}
+
+.form-perfil {
+    width: 100%;
+    max-width: 350px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.campo label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.campo input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #2a2a40;
+    color: white;
+    outline: none;
+}
+
+.campo input:focus {
+    border: 2px solid #00f2ff;
+}
+
+.btn-guardar {
+    width: 100%;
+    padding: 12px;
+    background: #00f2ff;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-guardar:hover {
+    background: #00c8d6;
+}
+
+
+/* FOOTER TIPO JUEGO */
+
+.footer-juego {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(180deg, #1e1e2f, #141421);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
+    border-top: 2px solid #2e2e4d;
+    z-index: 1000;
+}
+
+.item-footer {
+    text-decoration: none;
+    color: #aaa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    transition: 0.3s ease;
+}
+
+.item-footer i {
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.item-footer:hover {
+    color: #00f2ff;
+    transform: translateY(-3px);
+}
+
+.item-footer.activo {
+    color: #00f2ff;
+}
+
+/* MENSAJES FLOTANTES */
+
+.toast-mensaje {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 10000;
+}
+
+.toast-mensaje.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-mensaje.exito {
+    background-color: #28a745; /* verde */
+}
+
+.toast-mensaje.error {
+    background-color: #dc3545; /* rojo */
+}

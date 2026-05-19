@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/juego-youtube/static/css/main.7508365c.css",
+    "main.js": "/juego-youtube/static/js/main.a9b65daf.js",
+    "static/js/453.67c23076.chunk.js": "/juego-youtube/static/js/453.67c23076.chunk.js",
+    "index.html": "/juego-youtube/index.html",
+    "main.7508365c.css.map": "/juego-youtube/static/css/main.7508365c.css.map",
+    "main.a9b65daf.js.map": "/juego-youtube/static/js/main.a9b65daf.js.map",
+    "453.67c23076.chunk.js.map": "/juego-youtube/static/js/453.67c23076.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7508365c.css",
+    "static/js/main.a9b65daf.js"
+  ]
+}

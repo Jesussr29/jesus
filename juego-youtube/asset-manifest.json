@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/jesus/juego-youtube/static/css/main.7508365c.css",
-    "main.js": "/jesus/juego-youtube/static/js/main.c516824c.js",
+    "main.js": "/jesus/juego-youtube/static/js/main.62a6b837.js",
     "static/js/453.67c23076.chunk.js": "/jesus/juego-youtube/static/js/453.67c23076.chunk.js",
     "index.html": "/jesus/juego-youtube/index.html",
     "main.7508365c.css.map": "/jesus/juego-youtube/static/css/main.7508365c.css.map",
-    "main.c516824c.js.map": "/jesus/juego-youtube/static/js/main.c516824c.js.map",
+    "main.62a6b837.js.map": "/jesus/juego-youtube/static/js/main.62a6b837.js.map",
     "453.67c23076.chunk.js.map": "/jesus/juego-youtube/static/js/453.67c23076.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7508365c.css",
-    "static/js/main.c516824c.js"
+    "static/js/main.62a6b837.js"
   ]
 }

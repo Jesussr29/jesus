@@ -68,7 +68,7 @@ async function validarSesion() {
 function cerrarSesion() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
-    window.location.href = "../auth/login.html";
+    window.location.href = "/jesus/junta-y-gana/auth/login.html";
 }
 
 validarSesion();

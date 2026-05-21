@@ -1,94 +1,158 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amigos</title>
+    <title>Amigos · Junta y Gana</title>
     <link rel="stylesheet" href="./css/friends.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="./img/ico.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="./img/ico.jpg">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
+    <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;800&display=swap)" rel="stylesheet">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
+    <div class="bg-decoracion" aria-hidden="true">
+        <span class="orb orb-1"></span>
+        <span class="orb orb-2"></span>
+        <span class="orb orb-3"></span>
+    </div>
 
     <main class="contenedor-amigos">
 
-        <button class="btn-volver" onclick="window.location.href='index.html'">
-            ← Volver
-        </button>
-
-        <!-- BUSCAR AMIGOS -->
-        <section class="bloque">
-            <h2>Buscar amigos</h2>
-            <div class="buscador">
-                <input type="text" id="buscarUsuario" placeholder="Nombre de usuario">
-                <button id="btnBuscar">Buscar</button>
+        <!-- HEADER -->
+        <header class="header-pagina">
+            <button class="btn-volver" onclick="window.location.href='index.html'" aria-label="Volver">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="header-titulo">
+                <h1 class="titulo-pagina">
+                    <i class="fa-solid fa-users"></i>
+                    Amigos
+                </h1>
+                <p class="header-sub">Tu escuadrón en Junta y Gana</p>
             </div>
+            <div class="header-spacer"></div>
+        </header>
 
-            <div id="resultadosBusqueda"></div>
+        <!-- STATS RÁPIDAS -->
+        <section class="stats-rapidas">
+            <div class="stat-card">
+                <div class="stat-icono"><i class="fa-solid fa-user-group"></i></div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="statTotalAmigos">0</span>
+                    <span class="stat-label">Amigos</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icono stat-icono-2"><i class="fa-solid fa-bell"></i></div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="statSolicitudes">0</span>
+                    <span class="stat-label">Solicitudes</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icono stat-icono-3"><i class="fa-solid fa-crown"></i></div>
+                <div class="stat-info">
+                    <span class="stat-valor" id="statTopNivel">—</span>
+                    <span class="stat-label">Top nivel</span>
+                </div>
+            </div>
         </section>
 
-        <!-- BOTÓN MODAL -->
+        <!-- BUSCAR AMIGOS -->
+        <section class="bloque bloque-buscar">
+            <div class="bloque-header">
+                <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar jugadores</h2>
+                <p class="bloque-subtitulo">Introduce el nombre y tag (ej. <code>Jesus#5312</code>)</p>
+            </div>
+
+            <div class="buscador">
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" id="buscarUsuario" placeholder="nombre#tag" autocomplete="off">
+                </div>
+                <button id="btnBuscar" class="btn-primario">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Buscar</span>
+                </button>
+            </div>
+
+            <div id="resultadosBusqueda" class="resultados-busqueda"></div>
+        </section>
+
+        <!-- BOTÓN SOLICITUDES -->
         <button id="btnSolicitudes" class="btn-solicitudes">
-            Solicitudes de amistad
+            <span class="btn-solicitudes-icono">
+                <i class="fa-solid fa-user-plus"></i>
+            </span>
+            <span class="btn-solicitudes-texto">
+                <strong>Solicitudes de amistad</strong>
+                <small>Revisa quién quiere unirse a ti</small>
+            </span>
+            <i class="fa-solid fa-chevron-right btn-solicitudes-flecha"></i>
         </button>
 
         <!-- LISTA DE AMIGOS -->
         <section class="bloque" id="misAmigos">
-            <h2>Ranking amigos</h2>
-            <div id="listaAmigos"></div>
+            <div class="bloque-header">
+                <h2><i class="fa-solid fa-trophy"></i> Ranking de amigos</h2>
+                <p class="bloque-subtitulo">Ordenados por nivel</p>
+            </div>
+            <div id="listaAmigos" class="lista-amigos"></div>
         </section>
 
-        <!-- FOOTER DE ACCIONES -->
-
+        <!-- FOOTER NAVEGACIÓN -->
         <footer class="footer-juego">
             <a href="./index.html" class="item-footer">
                 <i class="fa-solid fa-house"></i>
                 <span>Inicio</span>
             </a>
-
             <a href="./friends.html" class="item-footer activo">
                 <i class="fa-solid fa-user-group"></i>
                 <span>Amigos</span>
             </a>
-
             <a href="./perfil.html" class="item-footer">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>
         </footer>
-
-
     </main>
 
     <!-- MODAL SOLICITUDES -->
-    <div id="modalSolicitudes" class="modal">
+    <div id="modalSolicitudes" class="modal" role="dialog" aria-modal="true">
         <div class="modal-contenido">
-            <span id="cerrarModal" class="cerrar">&times;</span>
-            <h2>Solicitudes de amistad</h2>
-
-            <!-- Más solicitudes -->
+            <button id="cerrarModal" class="cerrar" aria-label="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-envelope-open-text"></i> Solicitudes</h2>
+                <p class="bloque-subtitulo">Acepta o rechaza solicitudes pendientes</p>
+            </div>
+            <div class="solicitudes-lista" id="solicitudesLista"></div>
         </div>
     </div>
 
     <!-- MODAL CONFIRMACIÓN ELIMINAR -->
-    <div id="modal-eliminar" class="modal-eliminar">
+    <div id="modal-eliminar" class="modal-eliminar" role="dialog" aria-modal="true">
         <div class="modal-eliminar-contenido">
+            <div class="icono-advertencia">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Confirmar acción</h3>
             <p id="texto-eliminar">¿Estás seguro?</p>
             <div class="acciones-eliminar">
                 <button id="btn-cancelar-eliminar">Cancelar</button>
-                <button id="btn-confirmar-eliminar">Sí, eliminar</button>
+                <button id="btn-confirmar-eliminar">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                </button>
             </div>
         </div>
     </div>
 
-
     <script src="./js/friends.js"></script>
 </body>
-
 </html>

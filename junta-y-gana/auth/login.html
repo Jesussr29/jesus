@@ -1,32 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Iniciar Sesión | Junta y Gana</title>
   <link rel="stylesheet" href="login.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 
 <body>
+  <!-- Fondo con imagen del juego -->
+  <div class="background"></div>
+  <div class="overlay"></div>
 
-  <div class="container">
-    <h2>Iniciar sesión</h2>
-
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="login()">Entrar</button>
-    <p class="register-link">
-      ¿No tienes cuenta?
-      <a href="register.html">Regístrate</a>
-    </p>
+  <!-- Partículas decorativas -->
+  <div class="particles">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
   </div>
 
+  <main class="login-wrapper">
+    <!-- Panel izquierdo: branding del juego -->
+    <section class="brand-panel">
+      <div class="brand-content">
+        <div class="logo">
+          <span class="logo-mark">🧩</span>
+          <span class="logo-text">JUNTA<span> Y GANA</span></span>
+        </div>
+        <h1>Bienvenido,<br><span class="gradient-text">Estratega.</span></h1>
+        <p>Coloca bloques en un tablero 8x8, completa líneas y domina la partida. Cada movimiento cuenta en tu camino hacia la victoria.</p>
 
-  <p id="error"></p>
+        <ul class="features">
+          <li><span>◆</span> Tablero 8x8 con mecánicas tipo puzzle</li>
+          <li><span>◆</span> Competencias en tiempo real contra jugadores</li>
+          <li><span>◆</span> Ranking global y sistema de amigos</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Panel derecho: formulario -->
+    <section class="form-panel">
+      <div class="container">
+        <div class="form-header">
+          <h2>Iniciar Sesión</h2>
+          <p>Accede a tu cuenta para continuar la partida</p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); login();">
+          <div class="input-group">
+            <label for="email">Correo electrónico</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input type="email" id="email" placeholder="tucorreo@dominio.com" required>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="password">Contraseña</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox">
+              <input type="checkbox">
+              <span>Recordarme</span>
+            </label>
+            <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <button type="submit" class="btn-login">
+            <span>ENTRAR A LA PARTIDA</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+
+          <p id="error"></p>
+
+
+          <p class="register-link">
+            ¿No tienes cuenta? <a href="register.html">Regístrate gratis</a>
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
 
   <script src="auth.js"></script>
 </body>
-
 </html>

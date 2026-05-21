@@ -1,989 +1,714 @@
-const coloresPiezas = [
-    "#ff595e",
-    "#ffca3a",
-    "#8ac926",
-    "#1982c4",
-    "#6a00ff",
-    "#ff924c"
+/* =========================================================
+   BLOCK PUZZLE — versión refactorizada y limpia
+   ========================================================= */
+
+const API = "https://jesusweb.ddns.net/juntaygana";
+
+const COLORES_PIEZAS = [
+    "#ff595e", "#ffca3a", "#8ac926",
+    "#1982c4", "#a06cd5", "#ff924c"
 ];
 
+const PIEZAS = [
+    [[1]],
+    [[1,1]],            [[1],[1]],
+    [[1,1,1]],          [[1],[1],[1]],
+    [[1,1,1,1]],        [[1],[1],[1],[1]],
+    [[1,1],[1,1]],
+    [[1,0],[1,0],[1,1]],[[0,1],[0,1],[1,1]],
+    [[1,1,0],[0,1,1]],  [[0,1,1],[1,1,0]],
+    [[1,1,1],[0,1,0]],
+    [[1,1],[1,0]],      [[1,1],[0,1]],
+    [[1,1,1],[1,1,1]]
+];
+
+const TAM = 8;
 const token = localStorage.getItem("token");
 
-if (!token) {
-    window.location.href = "/junta-y-gana/auth/login.html";
-}
+/* ---------- Estado global ---------- */
+const estado = {
+    nivel: parseInt(localStorage.getItem("nivelSeleccionado")),
+    expActual: 0,
+    expRequerida: 0,
+    niveles: [],
+    idActual: null,
+    arrastreActivo: null,        // { pieza, offsetX, offsetY, formaId }
+    celdasResaltadas: [],
+    bloqueado: false             // se bloquea durante limpieza para evitar inputs
+};
 
-// ------------------- NIVELES Y EXPERIENCIA -------------------
-
-const nivelActual = parseInt(localStorage.getItem("nivelSeleccionado"));
-
-if (!nivelActual) {
-    window.location.href = "index.html";
-}
-
+/* ---------- Refs DOM ---------- */
+const tablero = document.getElementById("tablero");
+const contenedorPiezas = document.getElementById("piezas");
 const barraRelleno = document.getElementById("relleno-exp");
 const textoExp = document.getElementById("exp-text");
 const textoNivel = document.getElementById("nivel-text");
 
-let niveles = [];
-let expActual = 0;
-let expRequerida = 0;
+const celdas = [];
 
-// Actualiza la barra de experiencia visual
-function actualizarBarraExp() {
-    const barra = document.querySelector("#relleno-exp");
-    const porcentaje = Math.min((expActual / expRequerida) * 100, 100);
+/* =========================================================
+   SESIÓN
+   ========================================================= */
+async function validarSesion() {
+    const token = localStorage.getItem("token"); // 🔥 IMPORTANTE
 
-    // Animación de la barra (progresiva)
-    barra.style.width = porcentaje + "%";
-
-    // Brillo momentáneo al subir
-    barra.classList.add("resplandor");
-    setTimeout(() => barra.classList.remove("resplandor"), 400);
-
-    // Actualizar texto
-    textoExp.textContent = `${expActual} / ${expRequerida} EXP`;
-    textoNivel.textContent = `Nivel ${nivelActual}`;
-}
-
-function sumarExperiencia(cantidad) {
-    const objetivo = expActual + cantidad;
-    const duracion = 800; // 0.8s
-    const inicio = expActual;
-    const inicioTiempo = performance.now();
-
-    function animar(now) {
-        const tiempoTranscurrido = now - inicioTiempo;
-        const progreso = Math.min(tiempoTranscurrido / duracion, 1);
-
-        expActual = Math.floor(inicio + (objetivo - inicio) * progreso);
-        actualizarBarraExp();
-
-        if (progreso < 1) {
-            requestAnimationFrame(animar);
-        } else if (expActual >= expRequerida) {
-            pasarNivel();
-        }
+    if (!token) {
+        cerrarSesion();
+        return;
     }
 
-    requestAnimationFrame(animar);
-}
-
-
-
-function sumarExperiencia(cantidad) {
-    const objetivo = expActual + cantidad;
-    const duracion = 800; // duración de la animación en ms
-    const inicio = expActual;
-    const inicioTiempo = performance.now();
-
-    function animar(now) {
-        const tiempoTranscurrido = now - inicioTiempo;
-        const progreso = Math.min(tiempoTranscurrido / duracion, 1);
-
-        // Experiencia actual interpolada
-        expActual = Math.floor(inicio + (objetivo - inicio) * progreso);
-        actualizarBarraExp();
-
-        if (progreso < 1) {
-            requestAnimationFrame(animar);
-        } else {
-            // Si supera el requerido, pasar de nivel
-            if (expActual >= expRequerida) {
-                pasarNivel();
+    try {
+        const res = await fetch("https://jesusweb.ddns.net/juntaygana/usuario", {
+            headers: {
+                "Authorization": "Bearer " + token
             }
+        });
+
+        console.log("STATUS:", res.status); // 👈 debug útil
+
+        if (!res.ok) {
+            cerrarSesion();
+            return;
         }
+
+        const usuario = await res.json();
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+        if (usuario.id) {
+            localStorage.setItem("usuarioId", usuario.id);
+        }
+
+        if (usuario.vidas !== undefined) {
+            localStorage.setItem("usuarioVidas", usuario.vidas);
+        }
+
+    } catch (err) {
+        console.error("Error validando sesión:", err);
+        cerrarSesion();
     }
+}
 
-    requestAnimationFrame(animar);
-    animarTextoExp();
+function cerrarSesion() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    window.location.href = "/junta-y-gana/auth/login.html";
+}
 
+/* =========================================================
+   NIVEL Y EXP
+   ========================================================= */
+async function cargarNiveles() {
+    try {
+        const res = await fetch(`${API}/niveles`);
+        estado.niveles = await res.json();
+
+        const nivel = estado.niveles.find(n => n.id === estado.nivel);
+        if (!nivel) {
+            alert("Nivel no encontrado");
+            window.location.href = "index.html";
+            return;
+        }
+
+        // XP requerida = nivel * 100  (nivel 32 -> 3200)
+        estado.expRequerida = estado.nivel * 100;
+
+        actualizarBarraExp();
+    } catch (err) {
+        console.error("Error cargando niveles:", err);
+        // Fallback: aunque falle el fetch, calculamos por nivel
+        estado.expRequerida = estado.nivel * 100;
+        console.log("hola: " + estado.expRequerida);
+
+        actualizarBarraExp();
+    }
+}
+
+
+function actualizarBarraExp() {
+    const pct = Math.min((estado.expActual / estado.expRequerida) * 100, 100);
+    barraRelleno.style.width = pct + "%";
+    barraRelleno.classList.add("resplandor");
+    setTimeout(() => barraRelleno.classList.remove("resplandor"), 500);
+    textoExp.textContent = `${estado.expActual} / ${estado.expRequerida}`;
+    textoNivel.textContent = `Nivel ${estado.nivel}`;
 }
 
 function animarTextoExp() {
     textoExp.classList.add("text-animado");
     textoNivel.classList.add("text-animado");
-
     setTimeout(() => {
         textoExp.classList.remove("text-animado");
         textoNivel.classList.remove("text-animado");
-    }, 300);
+    }, 250);
 }
 
+function sumarExperiencia(cantidad) {
+    const objetivo = estado.expActual + cantidad;
+    const inicio = estado.expActual;
+    const duracion = 700;
+    const t0 = performance.now();
+    let yaSubio = false;
 
-
-async function cargarNiveles() {
-    const respuesta = await fetch("https://jesusweb.ddns.net/juntaygana/niveles");
-    niveles = await respuesta.json();
-    configurarNivel();
-}
-
-function configurarNivel() {
-    const nivel = niveles.find(n => n.id === nivelActual);
-
-    if (!nivel) {
-        alert("Nivel no encontrado");
-        return;
+    function animar(now) {
+        const t = Math.min((now - t0) / duracion, 1);
+        estado.expActual = Math.floor(inicio + (objetivo - inicio) * t);
+        actualizarBarraExp();
+        if (t < 1) {
+            requestAnimationFrame(animar);
+        } else if (estado.expActual >= estado.expRequerida && !yaSubio) {
+            yaSubio = true;
+            pasarNivel();
+        }
     }
-
-    expRequerida = nivel.exp_requerida;
-    expActual = 0;
-
-    actualizarBarraExp();
-    console.log(`Nivel ${nivelActual} → ${expRequerida} EXP`);
+    requestAnimationFrame(animar);
+    animarTextoExp();
 }
 
 function pasarNivel() {
-    const usuarioId = localStorage.getItem("usuarioId"); // recuperar id del usuario
-
+    const usuarioId = localStorage.getItem("usuarioId");
     if (!usuarioId) {
-        alert("No se ha encontrado el usuario.");
+        console.warn("No hay usuarioId");
+        window.location.href = "index.html";
         return;
     }
 
-    alert(`¡Nivel ${nivelActual} superado! usuario: ${usuarioId}`);
-
     sumarVida();
 
-    // Subir nivel del usuario
-    fetch("https://jesusweb.ddns.net/juntaygana/niveles", {
+    fetch(`${API}/niveles`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            nivel: nivelActual,
-            usuarioId: usuarioId // enviamos el id del usuario
-        })
+        body: JSON.stringify({ nivel: estado.nivel, usuarioId })
     })
-        .then(res => res.json())
-        .then(data => {
-            console.log(data.mensaje || data);
+        .then(r => r.json())
+        .then(() => {
             localStorage.removeItem("nivelSeleccionado");
-            localStorage.removeItem("usuarioId"); // limpiar si quieres
             window.location.href = "index.html";
         })
         .catch(err => {
-            console.error("Error al subir nivel:", err);
-            alert("Hubo un error al subir el nivel. Intenta de nuevo.");
+            console.error("Error subir nivel:", err);
+            window.location.href = "index.html";
         });
 }
 
-
-// ------------------- LOGICA DEL JUEGO -------------------
-
-let offsetX = 0;
-let offsetY = 0;
-let idActual = null;
-
-// Crear tablero
-const tablero = document.getElementById("tablero");
-const tamaño = 8;
-let celdas = [];
-
-for (let i = 0; i < tamaño * tamaño; i++) {
-    const celda = document.createElement("div");
-    celda.classList.add("celda");
-    celda.dataset.index = i;
-    tablero.appendChild(celda);
-    celdas.push(celda);
+/* =========================================================
+   TABLERO
+   ========================================================= */
+function crearTablero() {
+    for (let i = 0; i < TAM * TAM; i++) {
+        const c = document.createElement("div");
+        c.classList.add("celda");
+        c.dataset.index = i;
+        tablero.appendChild(c);
+        celdas.push(c);
+    }
 }
 
-// Piezas disponibles
-const piezasData = [
-    [[1]],
-
-    [[1, 1]],
-    [[1], [1]],
-
-    [[1, 1, 1]],
-    [[1], [1], [1]],
-
-    [[1, 1, 1, 1]],
-    [[1], [1], [1], [1]],
-
-    [[1, 1], [1, 1]],
-
-    [[1, 0], [1, 0], [1, 1]],
-    [[0, 1], [0, 1], [1, 1]],
-
-    [[1, 1, 0], [0, 1, 1]],
-    [[0, 1, 1], [1, 1, 0]],
-
-    [[1, 1, 1], [0, 1, 0]],
-
-    [[1, 1], [1, 0]],
-    [[1, 1], [0, 1]],
-
-    [[1, 1, 1], [1, 1, 1]]
-];
-
-// Contenedor de piezas
-const contenedorPiezas = document.getElementById("piezas");
-
+/* =========================================================
+   GENERACIÓN DE PIEZAS
+   ========================================================= */
 function generarPiezas() {
     contenedorPiezas.innerHTML = "";
-
-    let usadas = [];
-
-    while (usadas.length < 3) {
-        const indice = Math.floor(Math.random() * piezasData.length);
-        if (!usadas.includes(indice)) {
-            usadas.push(indice);
-            crearPieza(indice);
+    const usadas = new Set();
+    while (usadas.size < 3) {
+        const idx = Math.floor(Math.random() * PIEZAS.length);
+        if (!usadas.has(idx)) {
+            usadas.add(idx);
+            crearPieza(idx);
         }
     }
 }
 
+function crearPieza(formaId) {
+    const forma = PIEZAS[formaId];
+    const color = COLORES_PIEZAS[Math.floor(Math.random() * COLORES_PIEZAS.length)];
 
-function crearPieza(id) {
-    const forma = piezasData[id];
-
-    const color = coloresPiezas[Math.floor(Math.random() * coloresPiezas.length)];
-
-    const contenedor = document.createElement("div");
-    contenedor.classList.add("contenedor-pieza");
+    const cont = document.createElement("div");
+    cont.classList.add("contenedor-pieza");
 
     const pieza = document.createElement("div");
     pieza.classList.add("pieza");
-    pieza.draggable = true;
+    pieza.dataset.id = `${formaId}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    pieza.dataset.formaId = formaId;
+    pieza.dataset.color = color;
 
-    const idUnico = `${id}-${Date.now()}-${Math.random()}`;
-    pieza.dataset.id = idUnico;
-
-    pieza.dataset.colores = JSON.stringify(
-        forma.flat().filter(v => v === 1).map(() => color)
-    );
-
-    // Cambiamos px por 1fr para que se adapte
-    pieza.style.display = "grid";
-    pieza.style.gridTemplateColumns = `repeat(${forma[0].length}, 1fr)`;
-    pieza.style.gridAutoRows = "1fr"; // filas proporcionales
+    pieza.style.gridTemplateColumns = `repeat(${forma[0].length}, var(--celda-tam))`;
+    pieza.style.gridAutoRows = "var(--celda-tam)";
 
     forma.forEach(fila => {
-        fila.forEach(valor => {
-            const bloque = document.createElement("div");
-            if (valor === 1) {
-                bloque.classList.add("bloque");
-                bloque.style.backgroundColor = color;
+        fila.forEach(v => {
+            const b = document.createElement("div");
+            b.classList.add("bloque");
+            if (v === 1) {
+                b.style.backgroundColor = color;
+            } else {
+                b.classList.add("vacio");
             }
-            pieza.appendChild(bloque);
+            pieza.appendChild(b);
         });
     });
 
-    contenedor.appendChild(pieza);
-    contenedorPiezas.appendChild(contenedor);
+    cont.appendChild(pieza);
+    contenedorPiezas.appendChild(cont);
 
-    // Solo activar drag táctil si es móvil (pantalla menor a 768px, por ejemplo)
-    if (window.matchMedia("(max-width: 768px)").matches) {
-        pieza.addEventListener("touchstart", e => {
-            e.preventDefault();
-            idActual = pieza.dataset.id;
-
-            const rect = pieza.getBoundingClientRect();
-
-            // Hacemos que la pieza se dibuje un poco por encima del dedo (ej: 50px)
-            let offsetXTouch = e.touches[0].clientX - rect.left;
-            let offsetYTouch = e.touches[0].clientY - rect.top + 100; // <- este +50 hace que la pieza quede arriba del dedo
-
-            // Posición absoluta y z-index alto para que quede encima de todo
-            pieza.style.position = "absolute";
-            pieza.style.zIndex = 1000;
-
-            // Colocamos inicialmente la pieza donde estaba
-            pieza.style.left = rect.left + "px";
-            pieza.style.top = rect.top + "px";
-
-            // Movemos la pieza con el dedo
-            const mover = e2 => {
-                e2.preventDefault();
-                pieza.style.left = e2.touches[0].clientX - offsetXTouch + "px";
-                pieza.style.top = e2.touches[0].clientY - offsetYTouch + "px";
-            };
-
-            // Al soltar la pieza
-            const soltar = e2 => {
-                e2.preventDefault();
-
-                const tableroRect = tablero.getBoundingClientRect();
-                const rectPieza = pieza.getBoundingClientRect();
-
-                // Calculamos la posición relativa de la pieza al tablero
-                const x = rectPieza.left - tableroRect.left;
-                const y = rectPieza.top - tableroRect.top;
-
-                const tamañoCelda = celdas[0].offsetWidth;
-
-                // Verificamos si la pieza está dentro del tablero
-                if (x >= 0 && y >= 0 && x < tableroRect.width && y < tableroRect.height) {
-                    const col = Math.floor(x / tamañoCelda);
-                    const fila = Math.floor(y / tamañoCelda);
-
-                    const colFinal = Math.min(Math.max(col, 0), tamaño - 1);
-                    const filaFinal = Math.min(Math.max(fila, 0), tamaño - 1);
-
-                    const index = filaFinal * tamaño + colFinal;
-
-                    const id = parseInt(idActual.split("-")[0]);
-                    colocarPieza(index, piezasData[id]);
-                }
-
-                // Limpiamos estilos
-                pieza.style.position = "";
-                pieza.style.zIndex = "";
-                pieza.style.left = "";
-                pieza.style.top = "";
-
-                document.removeEventListener("touchmove", mover);
-                document.removeEventListener("touchend", soltar);
-            };
-
-
-            document.addEventListener("touchmove", mover, { passive: false });
-            document.addEventListener("touchend", soltar);
-        });
-
-
-
-
-    } else {
-        pieza.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("pieza", idUnico);
-            idActual = idUnico;
-
-            const rect = pieza.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-        });
-    }
-
+    activarArrastre(pieza);
 }
 
+/* =========================================================
+   SISTEMA DE ARRASTRE UNIFICADO (mouse + touch)
+   ========================================================= */
+function activarArrastre(pieza) {
+    const onDown = (clientX, clientY, isTouch) => {
+        if (estado.bloqueado) return;
 
-// ------------------- DRAG & DROP PARA MÓVIL -------------------
+        const rect = pieza.getBoundingClientRect();
+        // Offset desde el centro de la pieza para que se dibuje "centrada-arriba" del dedo
+        const offsetX = clientX - rect.left;
+        // En táctil desplazamos un poco la pieza arriba para que el dedo no la tape
+        const offsetY = clientY - rect.top + (isTouch ? 60 : 0);
 
-function habilitarDragTouch() {
-    let piezaActualTouch = null;
-    let offsetXTouch = 0;
-    let offsetYTouch = 0;
-    let celdaPreview = null; // Celda que vamos a marcar
+        // Quitamos la escala visual durante el arrastre
+        pieza.classList.add("arrastrando");
+        pieza.style.position = "fixed";
+        pieza.style.left = (rect.left) + "px";
+        pieza.style.top  = (rect.top) + "px";
+        pieza.style.margin = "0";
 
-    celdas.forEach(celda => {
-        const pieza = celda.querySelector(".pieza");
-        if (pieza) {
-            pieza.addEventListener("touchstart", e => {
-                e.preventDefault();
-                piezaActualTouch = pieza;
+        estado.idActual = pieza.dataset.id;
+        estado.arrastreActivo = { pieza, offsetX, offsetY };
 
-                const rect = pieza.getBoundingClientRect();
-                offsetXTouch = e.touches[0].clientX - rect.left;
-                offsetYTouch = e.touches[0].clientY - rect.top - 30;
+        // Forzar primer reposicionamiento
+        moverPieza(clientX, clientY);
+    };
 
-                pieza.style.position = "absolute";
-                pieza.style.zIndex = 1000;
+    const moverPieza = (clientX, clientY) => {
+        if (!estado.arrastreActivo) return;
+        const { pieza, offsetX, offsetY } = estado.arrastreActivo;
+        pieza.style.left = (clientX - offsetX) + "px";
+        pieza.style.top  = (clientY - offsetY) + "px";
+        actualizarPreview(clientX, clientY);
+    };
 
-                moverPiezaTouch(e);
-                document.addEventListener("touchmove", moverPiezaTouch, { passive: false });
-                document.addEventListener("touchend", soltarPiezaTouch);
-            });
+    const soltarPieza = (clientX, clientY) => {
+        if (!estado.arrastreActivo) return;
+        const { pieza } = estado.arrastreActivo;
+
+        const pos = calcularPosicionTablero(clientX, clientY, pieza);
+        const formaId = parseInt(pieza.dataset.formaId);
+        const forma = PIEZAS[formaId];
+
+        const colocada = pos !== null && intentarColocar(pos.fila, pos.col, forma);
+
+        limpiarResaltados();
+
+        if (colocada) {
+            // La pieza se elimina dentro de colocarPieza
+        } else {
+            // Volver a su sitio
+            pieza.classList.remove("arrastrando");
+            pieza.style.position = "";
+            pieza.style.left = "";
+            pieza.style.top = "";
+            pieza.style.margin = "";
         }
-    });
 
-    function moverPiezaTouch(e) {
+        estado.arrastreActivo = null;
+        estado.idActual = null;
+    };
+
+    /* ---- Mouse ---- */
+    pieza.addEventListener("mousedown", e => {
         e.preventDefault();
-        if (!piezaActualTouch) return;
+        onDown(e.clientX, e.clientY, false);
+        const onMove = ev => moverPieza(ev.clientX, ev.clientY);
+        const onUp = ev => {
+            soltarPieza(ev.clientX, ev.clientY);
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onUp);
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+    });
 
-        const clientX = e.touches[0].clientX;
-        const clientY = e.touches[0].clientY;
+    /* ---- Touch ---- */
+    pieza.addEventListener("touchstart", e => {
+        if (e.touches.length !== 1) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        onDown(t.clientX, t.clientY, true);
+    }, { passive: false });
 
-        piezaActualTouch.style.left = clientX - offsetXTouch + "px";
-        piezaActualTouch.style.top = clientY - offsetYTouch + "px";
+    pieza.addEventListener("touchmove", e => {
+        if (!estado.arrastreActivo) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        moverPieza(t.clientX, t.clientY);
+    }, { passive: false });
 
-        // **Mostrar celda donde se colocaría**
-        const tableroRect = tablero.getBoundingClientRect();
-        const x = clientX - tableroRect.left;
-        const y = clientY - tableroRect.top;
+    pieza.addEventListener("touchend", e => {
+        if (!estado.arrastreActivo) return;
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        soltarPieza(t.clientX, t.clientY);
+    });
 
-        const tamañoCelda = celdas[0].offsetWidth + 2;
-        const col = Math.floor(x / tamañoCelda);
-        const fila = Math.floor(y / tamañoCelda);
-        const index = fila * tamaño + col;
-
-        // Limpiar celda anterior
-        if (celdaPreview) celdaPreview.classList.remove("preview");
-
-        // Marcar celda actual
-        if (celdas[index]) {
-            celdaPreview = celdas[index];
-            celdaPreview.classList.add("preview");
+    pieza.addEventListener("touchcancel", () => {
+        if (estado.arrastreActivo) {
+            const { pieza } = estado.arrastreActivo;
+            pieza.classList.remove("arrastrando");
+            pieza.style.cssText = "";
+            limpiarResaltados();
+            estado.arrastreActivo = null;
+            estado.idActual = null;
         }
-    }
-
-    function soltarPiezaTouch(e) {
-        if (!piezaActualTouch) return;
-
-        const tableroRect = tablero.getBoundingClientRect();
-        const clientX = e.changedTouches[0].clientX;
-        const clientY = e.changedTouches[0].clientY;
-
-        const x = clientX - tableroRect.left;
-        const y = clientY - tableroRect.top;
-
-        const tamañoCelda = celdas[0].offsetWidth + 2;
-        const col = Math.floor(x / tamañoCelda);
-        const fila = Math.floor(y / tamañoCelda);
-        const index = fila * tamaño + col;
-
-        const id = parseInt(piezaActualTouch.dataset.id.split("-")[0]);
-        idActual = piezaActualTouch.dataset.id;
-
-        // **Solo colocar si la celda existe**
-        if (celdas[index]) {
-            colocarPieza(index, piezasData[id]);
-        }
-
-        // Limpiar estilos
-        piezaActualTouch.style.position = "";
-        piezaActualTouch.style.zIndex = "";
-        piezaActualTouch = null;
-
-        if (celdaPreview) {
-            celdaPreview.classList.remove("preview");
-            celdaPreview = null;
-        }
-
-        document.removeEventListener("touchmove", moverPiezaTouch);
-        document.removeEventListener("touchend", soltarPiezaTouch);
-    }
-
-
-
+    });
 }
 
+/* =========================================================
+   POSICIÓN, PREVIEW Y COLOCACIÓN
+   ========================================================= */
+function calcularPosicionTablero(clientX, clientY, pieza) {
+    const tableroRect = tablero.getBoundingClientRect();
+    const formaId = parseInt(pieza.dataset.formaId);
+    const forma = PIEZAS[formaId];
+    const ancho = forma[0].length;
+    const alto = forma.length;
 
-// Llamamos a la función después de generar piezas
+    // Posición real de la pieza visualmente
+    const piezaRect = pieza.getBoundingClientRect();
 
+    // Estimamos a partir de la esquina superior izquierda visual de la pieza
+    const relX = piezaRect.left - tableroRect.left;
+    const relY = piezaRect.top - tableroRect.top;
 
-// Drag & Drop tablero
-tablero.addEventListener("dragover", e => e.preventDefault());
+    // Tamaño real de una celda según el DOM (incluye gap)
+    const celdaRect = celdas[0].getBoundingClientRect();
+    const celdaTam = celdaRect.width;
+    const gap = (tableroRect.width - 16 /*padding*/ - celdaTam * TAM) / (TAM - 1);
+    const paso = celdaTam + gap;
 
-let celdasResaltadas = [];
+    // padding del tablero (8px CSS)
+    const padding = 8;
 
-tablero.addEventListener("dragover", e => {
-    e.preventDefault();
-    if (!idActual) return;
+    let col = Math.round((relX - padding) / paso);
+    let fila = Math.round((relY - padding) / paso);
 
-    const pieza = document.querySelector(`.pieza[data-id="${idActual}"]`);
-    const id = parseInt(idActual.split("-")[0]);
-    const forma = piezasData[id];
+    if (fila < 0 || col < 0) return null;
+    if (fila + alto > TAM || col + ancho > TAM) return null;
 
-    const rect = tablero.getBoundingClientRect();
-    const tamañoCelda = celdas[0].offsetWidth + 2;
+    return { fila, col };
+}
 
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+function actualizarPreview(clientX, clientY) {
+    limpiarResaltados();
+    if (!estado.arrastreActivo) return;
 
-    const anchoPieza = forma[0].length;
-    const altoPieza = forma.length;
+    const { pieza } = estado.arrastreActivo;
+    const pos = calcularPosicionTablero(clientX, clientY, pieza);
+    if (!pos) return;
 
-    let col = Math.floor((x - (anchoPieza * tamañoCelda) / 2) / tamañoCelda);
-    let fila = Math.floor((y - (altoPieza * tamañoCelda) / 2) / tamañoCelda);
+    const formaId = parseInt(pieza.dataset.formaId);
+    const forma = PIEZAS[formaId];
 
-    // Limitar dentro del tablero
-    col = Math.max(0, Math.min(tamaño - anchoPieza, col));
-    fila = Math.max(0, Math.min(tamaño - altoPieza, fila));
+    let valido = true;
+    const objetivo = [];
 
-    // Quitar resaltado anterior
-    celdasResaltadas.forEach(c => c.classList.remove("celda-resaltada", "celda-invalida"));
-    celdasResaltadas = [];
-
-    let puede = true;
-    // Ver qué celdas ocuparía la pieza
-    for (let f = 0; f < altoPieza; f++) {
-        for (let c = 0; c < anchoPieza; c++) {
+    for (let f = 0; f < forma.length; f++) {
+        for (let c = 0; c < forma[f].length; c++) {
             if (forma[f][c] === 1) {
-                const pos = (fila + f) * tamaño + (col + c);
-                if (celdas[pos].classList.contains("ocupada")) {
-                    puede = false;
-                }
-                celdasResaltadas.push(celdas[pos]);
+                const idx = (pos.fila + f) * TAM + (pos.col + c);
+                const celda = celdas[idx];
+                if (celda.classList.contains("ocupada")) valido = false;
+                objetivo.push(celda);
             }
         }
     }
 
-    // Resaltar
-    celdasResaltadas.forEach(celda => {
-        celda.classList.add(puede ? "celda-resaltada" : "celda-invalida");
+    objetivo.forEach(c => {
+        c.classList.add(valido ? "celda-resaltada" : "celda-invalida");
+        estado.celdasResaltadas.push(c);
     });
-});
+}
 
-tablero.addEventListener("drop", e => {
-    e.preventDefault();
-    if (!idActual) return;
+function limpiarResaltados() {
+    estado.celdasResaltadas.forEach(c =>
+        c.classList.remove("celda-resaltada", "celda-invalida"));
+    estado.celdasResaltadas = [];
+}
 
-    const pieza = document.querySelector(`.pieza[data-id="${idActual}"]`);
-    const id = parseInt(idActual.split("-")[0]);
-    const forma = piezasData[id];
-
-    const rect = tablero.getBoundingClientRect();
-    const tamañoCelda = celdas[0].offsetWidth + 2;
-
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const anchoPieza = forma[0].length;
-    const altoPieza = forma.length;
-
-    let col = Math.floor((x - (anchoPieza * tamañoCelda) / 2) / tamañoCelda);
-    let fila = Math.floor((y - (altoPieza * tamañoCelda) / 2) / tamañoCelda);
-
-    col = Math.max(0, Math.min(tamaño - anchoPieza, col));
-    fila = Math.max(0, Math.min(tamaño - altoPieza, fila));
-
-    // Comprobar si se puede colocar
-    let puede = true;
-    for (let f = 0; f < altoPieza; f++) {
-        for (let c = 0; c < anchoPieza; c++) {
-            if (forma[f][c] === 1) {
-                const pos = (fila + f) * tamaño + (col + c);
-                if (celdas[pos].classList.contains("ocupada")) {
-                    puede = false;
-                    break;
-                }
-            }
-        }
-        if (!puede) break;
-    }
-
-    // Limpiar resaltados
-    celdasResaltadas.forEach(c => c.classList.remove("celda-resaltada", "celda-invalida"));
-    celdasResaltadas = [];
-
-    if (puede) {
-        const index = fila * tamaño + col;
-        colocarPieza(index, forma);
-    }
-});
-
-
-
-
-function colocarPieza(index, forma) {
-    const filaInicio = Math.floor(index / tamaño);
-    const colInicio = index % tamaño;
-
-    let posiciones = [];
-
-    // 1️⃣ VALIDAR TODA LA PIEZA
+function intentarColocar(filaInicio, colInicio, forma) {
+    // Validar
+    const posiciones = [];
     for (let f = 0; f < forma.length; f++) {
         for (let c = 0; c < forma[f].length; c++) {
             if (forma[f][c] === 1) {
                 const fila = filaInicio + f;
-                const col = colInicio + c;
-
-                if (fila >= tamaño || col >= tamaño) return;
-                const pos = fila * tamaño + col;
-
-                if (celdas[pos].classList.contains("ocupada")) return;
-
-                posiciones.push(pos);
+                const col  = colInicio + c;
+                if (fila < 0 || col < 0 || fila >= TAM || col >= TAM) return false;
+                const idx = fila * TAM + col;
+                if (celdas[idx].classList.contains("ocupada")) return false;
+                posiciones.push(idx);
             }
         }
     }
 
-    // 2️⃣ COLOCAR (ya sabemos que es válida)
-    const pieza = document.querySelector(`.pieza[data-id="${idActual}"]`);
-    const coloresBloques = JSON.parse(pieza.dataset.colores);
+    const pieza = document.querySelector(`.pieza[data-id="${estado.idActual}"]`);
+    if (!pieza) return false;
+    const color = pieza.dataset.color;
 
-    posiciones.forEach((pos, i) => {
-        const celda = celdas[pos];
-        celda.classList.add("ocupada", "bloque");
-        celda.style.backgroundColor = coloresBloques[i];
+    posiciones.forEach(idx => {
+        const c = celdas[idx];
+        c.classList.add("ocupada");
+        c.style.backgroundColor = color;
     });
 
-    // 3️⃣ ELIMINAR LA PIEZA USADA (SIEMPRE)
-    const contenedor = pieza.parentElement;
-    if (contenedor) contenedor.remove();
-    idActual = null;
+    // Eliminar pieza del panel
+    const cont = pieza.parentElement;
+    cont?.remove();
 
+    // Regenerar piezas si se acabaron
     if (contenedorPiezas.children.length === 0) {
         generarPiezas();
     }
 
-    // 4️⃣ LIMPIAR LÍNEAS Y COMPROBAR DERROTA
-    limpiarLineas(() => {
-        comprobarDerrota();
-    });
+    // Limpieza y comprobación de derrota
+    limpiarLineas(() => comprobarDerrota());
+    return true;
 }
 
-
-
-
-
-
+/* =========================================================
+   LIMPIEZA DE LÍNEAS
+   ========================================================= */
 function limpiarLineas(callback) {
-    let celdasABorrar = new Set();
-    let lineasCompletadas = 0;
+    const aBorrar = new Set();
+    let lineas = 0;
 
     // Filas
-    for (let f = 0; f < tamaño; f++) {
-        const fila = celdas.slice(f * tamaño, f * tamaño + tamaño);
+    for (let f = 0; f < TAM; f++) {
+        const fila = celdas.slice(f * TAM, f * TAM + TAM);
         if (fila.every(c => c.classList.contains("ocupada"))) {
-            fila.forEach(c => celdasABorrar.add(c));
-            lineasCompletadas++;
+            fila.forEach(c => aBorrar.add(c));
+            lineas++;
         }
     }
-
     // Columnas
-    for (let c = 0; c < tamaño; c++) {
-        let columnaCompleta = true;
-        for (let f = 0; f < tamaño; f++) {
-            if (!celdas[f * tamaño + c].classList.contains("ocupada")) {
-                columnaCompleta = false;
-                break;
+    for (let c = 0; c < TAM; c++) {
+        let completa = true;
+        for (let f = 0; f < TAM; f++) {
+            if (!celdas[f * TAM + c].classList.contains("ocupada")) {
+                completa = false; break;
             }
         }
-
-        if (columnaCompleta) {
-            for (let f = 0; f < tamaño; f++) {
-                celdasABorrar.add(celdas[f * tamaño + c]);
-            }
-            lineasCompletadas++;
+        if (completa) {
+            for (let f = 0; f < TAM; f++) aBorrar.add(celdas[f * TAM + c]);
+            lineas++;
         }
     }
 
-    if (celdasABorrar.size === 0) {
-        if (callback) callback(); // Solo se llama si existe
+    if (aBorrar.size === 0) {
+        callback?.();
         return;
     }
 
-    celdasABorrar.forEach(celda => {
+    estado.bloqueado = true;
+    aBorrar.forEach(celda => {
         crearParticulas(celda);
         celda.classList.add("celda-limpiandose");
     });
 
     setTimeout(() => {
-        celdasABorrar.forEach(celda => {
-            celda.classList.remove("ocupada", "bloque", "celda-limpiandose");
+        aBorrar.forEach(celda => {
+            celda.classList.remove("ocupada", "celda-limpiandose");
             celda.style.backgroundColor = "";
         });
 
-        if (lineasCompletadas > 0) {
-            const puntos = lineasCompletadas * 100;
-            sumarExperiencia(puntos);
+        const puntos = lineas * 100 * (lineas > 1 ? lineas : 1); // bonus combo
+        sumarExperiencia(puntos);
 
-            const palabras = ["¡Genial!", "¡Perfecto!", "¡Increíble!", "¡Wow!"];
-            const mensaje = palabras[Math.floor(Math.random() * palabras.length)] + " +" + puntos;
+        const palabras = ["¡Genial!", "¡Perfecto!", "¡Increíble!", "¡Combo!"];
+        const txt = palabras[Math.min(lineas - 1, palabras.length - 1)] + ` +${puntos}`;
+        const primera = aBorrar.values().next().value;
+        const r = primera.getBoundingClientRect();
+        mostrarMensajeLinea(txt, r.left + r.width / 2, r.top);
 
-            const primeraCelda = celdasABorrar.values().next().value;
-            const rect = primeraCelda.getBoundingClientRect();
-            mostrarMensajeLinea(mensaje, rect.left, rect.top);
-        }
-
-        if (callback) callback();
-    }, 300);
+        estado.bloqueado = false;
+        callback?.();
+    }, 400);
 }
-
-
-// -- ---------------------- MENSAJES POR LINEA LIMPIADA ----------------------
 
 function mostrarMensajeLinea(texto, x, y) {
-    const mensaje = document.createElement("div");
-    mensaje.classList.add("mensaje-linea");
-    mensaje.textContent = texto;
-
-    // Colocarlo sobre el tablero
-    const contenedorTablero = document.querySelector("#tablero"); // Cambia si tu contenedor tiene otro ID
-    contenedorTablero.appendChild(mensaje);
-
-    // Posición
-    mensaje.style.left = x + "px";
-    mensaje.style.top = y + "px";
-
-    // Animación
-    requestAnimationFrame(() => {
-        mensaje.style.transform = "translateY(-50px)";
-        mensaje.style.opacity = "1";
-    });
-
-    // Desaparece después
-    setTimeout(() => {
-        mensaje.style.opacity = "0";
-        mensaje.style.transform = "translateY(-100px)";
-        setTimeout(() => mensaje.remove(), 600);
-    }, 600);
+    const m = document.createElement("div");
+    m.classList.add("mensaje-linea");
+    m.textContent = texto;
+    m.style.left = x + "px";
+    m.style.top = y + "px";
+    document.body.appendChild(m);
+    setTimeout(() => m.remove(), 1100);
 }
 
+function crearParticulas(celda, n = 8) {
+    const rectCelda = celda.getBoundingClientRect();
+    const rectTab = tablero.getBoundingClientRect();
+    const color = celda.style.backgroundColor || "#fff";
 
-
-// ------------------- PARTICULAS DE DESTRUCCION -------------------
-
-function crearParticulas(celda, cantidad = 8) {
-    const rect = celda.getBoundingClientRect();
-    const contenedor = celda.parentElement;
-
-    for (let i = 0; i < cantidad; i++) {
-        const particula = document.createElement("div");
-        particula.classList.add("particula");
-
-        const x = (Math.random() - 0.5) * 80 + "px";
-        const y = (Math.random() - 0.5) * 80 + "px";
-
-        particula.style.setProperty("--x", x);
-        particula.style.setProperty("--y", y);
-
-        particula.style.left = celda.offsetLeft + celda.offsetWidth / 2 + "px";
-        particula.style.top = celda.offsetTop + celda.offsetHeight / 2 + "px";
-
-        particula.style.color = celda.style.backgroundColor || "#fff";
-
-        contenedor.appendChild(particula);
-
-        // Eliminar la partícula
-        setTimeout(() => particula.remove(), 500);
+    for (let i = 0; i < n; i++) {
+        const p = document.createElement("div");
+        p.classList.add("particula");
+        p.style.color = color;
+        p.style.setProperty("--x", ((Math.random() - 0.5) * 90) + "px");
+        p.style.setProperty("--y", ((Math.random() - 0.5) * 90) + "px");
+        p.style.left = (rectCelda.left - rectTab.left + rectCelda.width / 2 - 4) + "px";
+        p.style.top  = (rectCelda.top - rectTab.top + rectCelda.height / 2 - 4) + "px";
+        tablero.appendChild(p);
+        setTimeout(() => p.remove(), 750);
     }
 }
 
-
-
+/* =========================================================
+   DERROTA
+   ========================================================= */
 function puedeColocarse(forma) {
     const alto = forma.length;
     const ancho = forma[0].length;
 
-    for (let filaInicio = 0; filaInicio <= tamaño - alto; filaInicio++) {
-        for (let colInicio = 0; colInicio <= tamaño - ancho; colInicio++) {
-
-            let encaja = true;
-            let bloquesColocados = 0;
-
-            for (let f = 0; f < alto; f++) {
-                for (let c = 0; c < ancho; c++) {
-                    if (forma[f][c] === 1) {
-                        const fila = filaInicio + f;
-                        const col = colInicio + c;
-                        const pos = fila * tamaño + col;
-
-                        if (celdas[pos].classList.contains("ocupada")) {
-                            encaja = false;
-                            break;
-                        }
-
-                        bloquesColocados++;
+    for (let f0 = 0; f0 <= TAM - alto; f0++) {
+        for (let c0 = 0; c0 <= TAM - ancho; c0++) {
+            let ok = true;
+            for (let f = 0; f < alto && ok; f++) {
+                for (let c = 0; c < ancho && ok; c++) {
+                    if (forma[f][c] === 1 &&
+                        celdas[(f0 + f) * TAM + (c0 + c)].classList.contains("ocupada")) {
+                        ok = false;
                     }
                 }
-                if (!encaja) break;
             }
-
-            // 🔴 CLAVE: al menos un bloque debe colocarse
-            if (encaja && bloquesColocados > 0) {
-                return true;
-            }
+            if (ok) return true;
         }
     }
-
     return false;
 }
 
-
-
 function comprobarDerrota() {
     const piezas = document.querySelectorAll(".pieza");
+    if (piezas.length === 0) return;
 
-    if (piezas.length === 0) {
-        return;
+    for (const p of piezas) {
+        const formaId = parseInt(p.dataset.formaId);
+        if (puedeColocarse(PIEZAS[formaId])) return;
     }
 
-    for (let pieza of piezas) {
-        const id = parseInt(pieza.dataset.id.split("-")[0]);
-        const forma = piezasData[id];
-
-        if (puedeColocarse(forma)) {
-            return; // Aún hay jugadas posibles
-        }
-    }
-
-    let vidas = Number(localStorage.getItem("usuarioVidas"));
-    console.log("Vidas:", vidas);
-
-    if (vidas === 5) {
-        actualizarUltimaRecarga();
-    }
-
-    console.log("DERROTA REAL");
+    const vidas = Number(localStorage.getItem("usuarioVidas"));
+    if (vidas === 5) actualizarUltimaRecarga();
 
     mostrarDerrota();
 }
 
 function mostrarDerrota() {
-    const modal = document.getElementById("modal-derrota");
-
-    modal.classList.remove("oculto");
-
-    // Bloquear el tablero
-    tablero.style.pointerEvents = "none";
-    contenedorPiezas.style.pointerEvents = "none";
+    document.getElementById("modal-derrota").classList.remove("oculto");
+    estado.bloqueado = true;
 }
 
-
-
-
+/* =========================================================
+   API VIDAS
+   ========================================================= */
 function restarVida() {
-    fetch("https://jesusweb.ddns.net/juntaygana/usuario/perder-vida", {
+    fetch(`${API}/usuario/perder-vida`, {
         method: "POST",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Vidas restantes:", data.vidas);
-        });
-
+        headers: { Authorization: "Bearer " + token }
+    }).then(r => r.json()).then(d => {
+        if (d.vidas !== undefined) localStorage.setItem("usuarioVidas", d.vidas);
+    }).catch(console.error);
 }
 
-// ----------------------
-// Función para sumar una vida desde el servidor
-// ----------------------
 function sumarVida() {
-
-    fetch("https://jesusweb.ddns.net/juntaygana/usuario/sumar-vida", {
+    fetch(`${API}/usuario/sumar-vida`, {
         method: "POST",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-        .then(res => res.json())
-        .then(console.log)
-        .catch(console.error);
-
+        headers: { Authorization: "Bearer " + token }
+    }).catch(console.error);
 }
-
-// ----------------------
-// Función para comprobar vidas del usuario
-// ----------------------
 
 function comprobarVidas() {
-    fetch("https://jesusweb.ddns.net/juntaygana/usuario", {
-        method: "GET",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-        .then(res => res.json())
-        .then(usuario => {
-            if (usuario.vidas <= 0) {
-                mostrarModalSinVidas();
-            }
-        })
-        .catch(console.error);
+    fetch(`${API}/usuario`, {
+        headers: { Authorization: "Bearer " + token }
+    }).then(r => r.json()).then(u => {
+        if (u.vidas <= 0) mostrarModalSinVidas();
+    }).catch(console.error);
 }
 
-
-
-// ----------------------
-// Función para actualizar la última recarga de vida del usuario
-// ----------------------
 function actualizarUltimaRecarga() {
-    fetch("https://jesusweb.ddns.net/juntaygana/usuario/actualizar-recarga", {
+    fetch(`${API}/usuario/actualizar-recarga`, {
         method: "POST",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-        .then(res => res.json())
-        .then(console.log)
-        .catch(console.error);
+        headers: { Authorization: "Bearer " + token }
+    }).catch(console.error);
 }
-
-// ------------------- MODAL SIN VIDAS -------------------
 
 function mostrarModalSinVidas() {
     const overlay = document.getElementById("overlaySinVidas");
     const texto = document.getElementById("vidasContadorTexto");
-    const contador = document.querySelector(".vidas-contador");
+    const contador = overlay.querySelector(".vidas-contador");
 
-    let segundos = 3;
-    const total = 3;
-
-    overlay.classList.remove("oculto-vidas");
-    texto.textContent = segundos;
+    overlay.classList.remove("oculto");
+    let s = 3;
+    texto.textContent = s;
     contador.style.setProperty("--progreso", "100%");
 
-    const intervalo = setInterval(() => {
-        segundos--;
-        texto.textContent = segundos;
-
-        const porcentaje = (segundos / total) * 100;
-        contador.style.setProperty("--progreso", porcentaje + "%");
-
-        if (segundos <= 0) {
-            clearInterval(intervalo);
+    const it = setInterval(() => {
+        s--;
+        texto.textContent = Math.max(s, 0);
+        contador.style.setProperty("--progreso", (s / 3 * 100) + "%");
+        if (s <= 0) {
+            clearInterval(it);
             window.location.href = "index.html";
         }
     }, 1000);
 }
 
+/* =========================================================
+   MODAL DE SALIDA (botón atrás)
+   ========================================================= */
+function configurarSalida() {
+    const modal = document.getElementById("modalSalirCustom");
+    const ok = document.getElementById("confirmarSalirCustom");
+    const cancel = document.getElementById("cancelarSalirCustom");
 
-
-// ------------------- INICIALIZACION -------------------
-
-generarPiezas();
-cargarNiveles();
-actualizarBarraExp();
-restarVida();
-habilitarDragTouch();
-comprobarVidas();
-
-
-// ------------------- BOTONES MODAL DERROTA -------------------
-
-document.getElementById("btn-reintentar").addEventListener("click", () => {
-    location.reload();
-});
-
-document.getElementById("btn-menu").addEventListener("click", () => {
-    window.location.href = "index.html"; // cambia la ruta si hace falta
-});
-
-// ------------------- DETECCIÓN DE SALIDA -------------------
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const modal = document.getElementById("modalSalir");
-    const confirmar = document.getElementById("confirmarSalir");
-    const cancelar = document.getElementById("cancelarSalir");
-
-    let vidas = Number(localStorage.getItem("usuarioVidas"));
-    console.log("vidas -----" + vidas);
-
-    if (!modal || !confirmar || !cancelar) return;
-
-    // Bloqueamos el botón atrás
     history.pushState(null, "", location.href);
-
-    // 🔹 BOTÓN ATRÁS
     window.addEventListener("popstate", () => {
-        modal.style.display = "flex";
+        modal.classList.remove("oculto");
         history.pushState(null, "", location.href);
     });
 
-    // 🔹 CONFIRMAR SALIDA
-    confirmar.addEventListener("click", () => {
-
-        // 👉 ACCIÓN ANTES DE SALIR
-        if (vidas == 5) {
-            actualizarUltimaRecarga();
-            alert("Se ha actualizado la última recarga de vidas.");
-        }
-
-        // Salida real
+    ok.addEventListener("click", () => {
+        const vidas = Number(localStorage.getItem("usuarioVidas"));
+        if (vidas === 5) actualizarUltimaRecarga();
         window.location.href = "index.html";
     });
 
-    // 🔹 CANCELAR SALIDA
-    cancelar.addEventListener("click", () => {
-        modal.style.display = "none";
+    cancel.addEventListener("click", () => modal.classList.add("oculto"));
+}
+
+/* =========================================================
+   INICIALIZACIÓN
+   ========================================================= */
+function init() {
+    if (!estado.nivel) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    crearTablero();
+    generarPiezas();
+    actualizarBarraExp();
+
+    document.getElementById("btn-reintentar").addEventListener("click", () => location.reload());
+    document.getElementById("btn-menu").addEventListener("click", () => window.location.href = "index.html");
+
+    configurarSalida();
+
+    // Asíncronos sin bloquear
+    validarSesion().then(() => {
+        cargarNiveles();
+        comprobarVidas();
+        restarVida();
     });
+}
 
-});
-
-
-
+init();

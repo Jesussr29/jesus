@@ -1,83 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Block Puzzle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link rel="stylesheet" href="./css/game.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="./img/ico.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="./img/ico.jpg">
-
-    <!-- APP WEB -->
-
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#000000">
-
-    <!-- iOS -->
+    <meta name="theme-color" content="#1a1f3a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-
-
-
 <body>
-
-    <div id="juego">
-
-        <div id="barra-exp-container">
-            <span id="nivel-text">Nivel 1</span>
-            <div id="barra-exp">
-                <div id="relleno-exp"></div>
+    <main id="juego">
+        <header id="hud">
+            <div id="barra-exp-container">
+                <span id="nivel-text">Nivel 1</span>
+                <div id="barra-exp">
+                    <div id="relleno-exp"></div>
+                    <div id="brillo-exp"></div>
+                </div>
+                <span id="exp-text">0 / 0</span>
             </div>
-            <span id="exp-text">0 / 0 EXP</span>
-        </div>
+        </header>
 
+        <section id="zona-tablero">
+            <div id="tablero" aria-label="Tablero de juego"></div>
+        </section>
 
-        <div id="tablero"></div>
-        <div id="piezas"></div>
-    </div>
+        <section id="piezas" aria-label="Piezas disponibles"></section>
+    </main>
 
-    <div id="modal-derrota" class="modal oculto">
+    <!-- Modal derrota -->
+    <div id="modal-derrota" class="modal oculto" role="dialog" aria-modal="true">
         <div class="modal-contenido">
-            <h2>💀 Has perdido</h2>
-            <p>No hay más movimientos posibles</p>
-
+            <div class="modal-icono">💀</div>
+            <h2>Has perdido</h2>
+            <p>No quedan movimientos posibles</p>
             <div class="modal-botones">
-                <button id="btn-reintentar">Volver a intentarlo</button>
-                <button id="btn-menu">Volver al menú</button>
+                <button id="btn-reintentar" class="btn btn-primario">Reintentar</button>
+                <button id="btn-menu" class="btn btn-secundario">Menú</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div id="modalSalirCustom" class="modal-custom">
-        <div class="modal-contenido-custom">
-            <p>¿Estás seguro de salir?<br>Perderás una vida.</p>
-            <button id="confirmarSalirCustom">Sí, salir</button>
-            <button id="cancelarSalirCustom">Cancelar</button>
+    <!-- Modal salir -->
+    <div id="modalSalirCustom" class="modal oculto" role="dialog" aria-modal="true">
+        <div class="modal-contenido">
+            <div class="modal-icono">⚠️</div>
+            <h2>¿Salir del nivel?</h2>
+            <p>Perderás una vida si abandonas ahora.</p>
+            <div class="modal-botones">
+                <button id="confirmarSalirCustom" class="btn btn-peligro">Sí, salir</button>
+                <button id="cancelarSalirCustom" class="btn btn-secundario">Cancelar</button>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL SIN VIDAS -->
-
-    <div id="overlaySinVidas" class="vidas-overlay oculto-vidas">
-        <div class="vidas-modal">
-            <h2>💔 Sin vidas</h2>
-            <p>Serás redirigido al inicio en</p>
-
+    <!-- Modal sin vidas -->
+    <div id="overlaySinVidas" class="modal oculto" role="dialog" aria-modal="true">
+        <div class="modal-contenido">
+            <div class="modal-icono">💔</div>
+            <h2>Sin vidas</h2>
+            <p>Volviendo al menú en…</p>
             <div class="vidas-contador" style="--progreso: 100%">
                 <span id="vidasContadorTexto">3</span>
             </div>
-
         </div>
     </div>
 
-
-
     <script src="./js/game.js"></script>
-
 </body>
-
 </html>

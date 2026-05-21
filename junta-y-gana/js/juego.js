@@ -30,15 +30,48 @@ contadorVidas.parentNode.appendChild(tiempoSiguienteVida);
 // }
 
 
-// ----------------------
+// ---------------------- 
 // COMPROBAR TOKEN
 // ----------------------
 
 const token = localStorage.getItem("token");
 
-if (!token) {
+async function validarSesion() {
+    if (!token) {
+        cerrarSesion();
+        return;
+    }
+
+    try {
+        const res = await fetch("https://jesusweb.ddns.net/juntaygana/usuario", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if (!res.ok) {
+            // Token inválido o expirado
+            cerrarSesion();
+            return;
+        }
+
+        // Token válido → puedes continuar
+        const usuario = await res.json();
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+    } catch (err) {
+        console.error("Error validando sesión:", err);
+        cerrarSesion();
+    }
+}
+
+function cerrarSesion() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
     window.location.href = "/junta-y-gana/auth/login.html";
 }
+
+validarSesion();
 
 // ----------------------
 // Función para obtener datos reales del servidor
@@ -111,7 +144,7 @@ window.addEventListener("popstate", async () => {
     // Esto se dispara cuando el usuario vuelve con la flecha atrás
     await obtenerDatosServidor(); // Trae vidas actualizadas del backend
     actualizarUI();               // Actualiza contador
-    
+
 });
 
 
@@ -190,20 +223,14 @@ async function cargarNiveles() {
             const nodo = document.createElement("div");
             nodo.classList.add("nivel");
 
-            // Estado según usuario
             if (nivel.id < usuario.nivel) {
-                nodo.classList.add("completado"); // niveles previos
+                nodo.classList.add("completado");
             } else if (nivel.id === usuario.nivel) {
-                // Si no hay siguiente nivel, este también se marca como completado
-                if (usuario.nivel === niveles.length) {
-                    nodo.classList.add("completado");
-                } else {
-                    nodo.classList.add("completado"); // opcional, puede estar bloqueado hasta que suba
-                }
+                nodo.classList.add("completado");
             } else if (nivel.id === usuario.nivel + 1) {
-                nodo.classList.add("actual"); // nivel a jugar
+                nodo.classList.add("actual");
             } else {
-                nodo.classList.add("bloqueado"); // niveles futuros
+                nodo.classList.add("bloqueado");
             }
 
             nodo.innerText = nivel.id;
@@ -255,17 +282,26 @@ async function cargarNiveles() {
                 }
             };
 
+            // Posicionamiento
+            const offsetX = nivel.id % 2 === 0 ? DESPLAZO_H : -DESPLAZO_H;
             nodo.style.position = "absolute";
             nodo.style.top = `${(niveles.length - nivel.id) * ESPACIO_VERTICAL}px`;
-            const offsetX = nivel.id % 2 === 0 ? DESPLAZO_H : -DESPLAZO_H;
             nodo.style.left = `calc(50% + ${offsetX}px)`;
             nodo.style.transform = "translateX(-50%)";
-
+            nodo.dataset.offsetX = offsetX; // 👈 importante
             caminoNiveles.appendChild(nodo);
             nodos.push(nodo);
         });
 
+        // para que las líneas se redibujen al rotar el móvil o cambiar tamaño
+        let nodosGlobal = [];
+        window.addEventListener("resize", () => {
+            if (nodosGlobal.length > 0) dibujarLineas(nodosGlobal);
+        });
 
+
+        nodosGlobal = nodos;
+        dibujarLineas(nodos);
 
         dibujarLineas(nodos);
 
@@ -289,19 +325,23 @@ async function cargarNiveles() {
 // Función para dibujar líneas entre nodos
 // ----------------------
 function dibujarLineas(nodos) {
+    // Eliminar líneas previas (importante para resize)
+    caminoNiveles.querySelectorAll(".linea").forEach(l => l.remove());
+
+    const contRect = caminoNiveles.getBoundingClientRect();
+    const centroX = contRect.width / 2;
+    const NODO_SIZE = nodos[0]?.offsetWidth || 72;
+
     for (let i = 0; i < nodos.length - 1; i++) {
         const nodoA = nodos[i];
         const nodoB = nodos[i + 1];
 
-        const rectA = nodoA.getBoundingClientRect();
-        const rectB = nodoB.getBoundingClientRect();
-        const contRect = caminoNiveles.getBoundingClientRect();
+        // Centro de cada nodo (top + mitad altura, left ya está centrado por translateX(-50%))
+        const xA = centroX + parseFloat(nodoA.dataset.offsetX);
+        const yA = parseFloat(nodoA.style.top) + NODO_SIZE / 2;
 
-        const xA = rectA.left + rectA.width / 2 - contRect.left;
-        const yA = rectA.top + rectA.height / 2 - contRect.top;
-
-        const xB = rectB.left + rectB.width / 2 - contRect.left;
-        const yB = rectB.top + rectB.height / 2 - contRect.top;
+        const xB = centroX + parseFloat(nodoB.dataset.offsetX);
+        const yB = parseFloat(nodoB.style.top) + NODO_SIZE / 2;
 
         const dx = xB - xA;
         const dy = yB - yA;
@@ -311,18 +351,17 @@ function dibujarLineas(nodos) {
         const linea = document.createElement("div");
         linea.classList.add("linea");
         linea.style.width = `${distancia}px`;
-        linea.style.height = "10px";
-        linea.style.background = "linear-gradient(to right, #ff00ff, #00ffff)";
         linea.style.position = "absolute";
         linea.style.top = `${yA}px`;
         linea.style.left = `${xA}px`;
         linea.style.transform = `rotate(${angulo}deg)`;
         linea.style.transformOrigin = "0 50%";
-        linea.style.zIndex = -1;
+        linea.style.zIndex = "-1";
 
         caminoNiveles.appendChild(linea);
     }
 }
+
 
 // ----------------------
 // Al cargar la página

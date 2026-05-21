@@ -2,162 +2,463 @@
    RESET BÁSICO
 ========================== */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif;
 }
 
+/* ==========================
+   VARIABLES — MODO CLARO (default)
+========================== */
+:root {
+    /* Fondos */
+    --bg-primary: #f4f6fb;
+    --bg-secondary: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --surface: #ffffff;
+    --surface-2: #f7f9ff;
+
+    /* Texto */
+    --text: #1a1d2e;
+    --text-muted: #5a6079;
+    --text-soft: #5a6079;
+
+    /* Acentos */
+    --accent: #5b6fff;
+    --accent-2: #8b5cf6;
+    --accent-glow: rgba(91, 111, 255, 0.35);
+    --primary: #5b6fff;
+    --primary-2: #8b5cf6;
+
+    /* Estados */
+    --success: #22c55e;
+    --warning: #fbbf24;
+    --danger: #ef4444;
+
+    /* Bordes y sombras */
+    --border: rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 2px 8px rgba(30, 30, 60, 0.06);
+    --shadow-md: 0 8px 24px rgba(30, 30, 60, 0.10);
+    --shadow-lg: 0 16px 40px rgba(30, 30, 60, 0.18);
+
+    /* Layout */
+    --radius: 16px;
+    --radius-sm: 10px;
+    --header-h: 70px;
+    --footer-h: 72px;
+
+    /* Gradiente de fondo (claro) */
+    --bg-gradient:
+        radial-gradient(circle at 20% 10%, rgba(139, 92, 246, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(91, 111, 255, 0.12), transparent 45%),
+        linear-gradient(180deg, #f4f6fb 0%, #eaeefb 100%);
+}
+
+/* ==========================
+   VARIABLES — MODO OSCURO
+========================== */
+body.dark-mode {
+    --bg-primary: #0f0f1c;
+    --bg-secondary: #1a1a2e;
+    --bg-card: rgba(30, 30, 47, 0.85);
+    --surface: #1a1c33;
+    --surface-2: #232544;
+
+    --text: #ffffff;
+    --text-muted: #9a9ab0;
+    --text-soft: #a6abc9;
+
+    --accent: #00f2ff;
+    --accent-2: #7b2cff;
+    --accent-glow: rgba(0, 242, 255, 0.4);
+    --primary: #5b6fff;
+    --primary-2: #8b5cf6;
+
+    --danger: #ff4d6d;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+
+    --bg-gradient:
+        radial-gradient(circle at 20% 10%, rgba(123, 44, 255, 0.25), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(0, 242, 255, 0.18), transparent 45%),
+        linear-gradient(180deg, #0f0f1c 0%, #141421 100%);
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ==========================
+   CONTENEDOR PRINCIPAL
+========================== */
 .perfil-container {
     min-height: 100vh;
-    background: linear-gradient(180deg, #1e1e2f, #141421);
+    background: var(--bg-gradient);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px;
-    color: white;
+    padding: 0 20px 120px;
+    position: relative;
 }
 
-.perfil-container h2 {
-    margin-bottom: 30px;
-    font-size: 26px;
+/* ==========================
+   HEADER
+========================== */
+.perfil-header {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    padding: 40px 20px 20px;
 }
 
+.titulo-perfil {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.titulo-perfil i {
+    -webkit-text-fill-color: var(--accent);
+    margin-right: 8px;
+}
+
+.subtitulo-perfil {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* ==========================
+   TARJETA PERFIL
+========================== */
+.perfil-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 30px 25px;
+    box-shadow: var(--shadow-lg);
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.perfil-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+}
+
+/* ==========================
+   FOTO DE PERFIL
+========================== */
 .foto-perfil {
     position: relative;
-    margin-bottom: 30px;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 25px;
 }
 
-.foto-perfil img {
-    width: 130px;
-    height: 130px;
+.anillo-foto {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    padding: 4px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 25px var(--accent-glow);
+    animation: pulse-ring 3s ease-in-out infinite;
+}
+
+.anillo-foto img {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #00f2ff;
+    border: 3px solid var(--bg-secondary);
+    background: var(--bg-secondary);
+}
+
+@keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 25px var(--accent-glow); }
+    50%     { box-shadow: 0 0 35px var(--accent-2); }
 }
 
 .btn-cambiar-foto {
     position: absolute;
     bottom: 5px;
     right: 5px;
-    background: #00f2ff;
-    width: 35px;
-    height: 35px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: black;
+    color: white;
     cursor: pointer;
-    transition: 0.3s;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 3px solid var(--bg-secondary);
+    box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .btn-cambiar-foto:hover {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(8deg);
+    box-shadow: 0 6px 20px var(--accent-glow);
 }
 
+.btn-cambiar-foto i {
+    font-size: 15px;
+}
+
+/* ==========================
+   INFO RÁPIDA (CHIPS)
+========================== */
+.info-rapida {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--border);
+}
+
+.chip-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--text);
+    transition: 0.3s;
+}
+
+.chip-info:hover {
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    transform: translateY(-2px);
+}
+
+.chip-info i,
+.chip-info strong {
+    color: var(--accent);
+}
+
+.chip-info strong {
+    font-weight: 600;
+}
+
+/* ==========================
+   FORMULARIO
+========================== */
 .form-perfil {
-    width: 100%;
-    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
 }
 
 .campo {
     display: flex;
     flex-direction: column;
-    margin-bottom: 20px;
 }
 
 .campo label {
-    margin-bottom: 5px;
-    font-size: 14px;
-    color: #aaa;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.campo label i {
+    color: var(--accent);
+    font-size: 12px;
 }
 
 .campo input {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #2a2a40;
-    color: white;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
     outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    transition: 0.25s ease;
+}
+
+.campo input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
 }
 
 .campo input:focus {
-    border: 2px solid #00f2ff;
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* ==========================
+   BOTONES
+========================== */
 .btn-guardar {
     width: 100%;
-    padding: 12px;
-    background: #00f2ff;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    color: white;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    box-shadow: 0 6px 20px var(--accent-glow);
+    font-family: inherit;
 }
 
 .btn-guardar:hover {
-    background: #00c8d6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px var(--accent-glow);
 }
 
+.btn-guardar:active {
+    transform: translateY(0);
+}
 
-/* FOOTER TIPO JUEGO */
+.btn-cerrar-sesion {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1.5px solid color-mix(in srgb, var(--danger) 35%, transparent);
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--danger);
+    cursor: pointer;
+    transition: 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+}
 
+.btn-cerrar-sesion:hover {
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    border-color: var(--danger);
+}
+
+/* ==========================
+   FOOTER NAV
+========================== */
 .footer-juego {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(180deg, #1e1e2f, #141421);
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--border);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 10px 0;
-    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.4);
-    border-top: 2px solid #2e2e4d;
+    padding: 10px 8px;
+    border-radius: 22px;
+    box-shadow: var(--shadow-lg);
     z-index: 1000;
 }
 
 .item-footer {
+    flex: 1;
     text-decoration: none;
-    color: #aaa;
+    color: var(--text-soft);
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 12px;
-    transition: 0.3s ease;
+    justify-content: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 8px 4px;
+    border-radius: 14px;
+    transition: all 0.25s ease;
 }
 
 .item-footer i {
-    font-size: 20px;
-    margin-bottom: 4px;
+    font-size: 18px;
+    transition: transform 0.25s ease;
 }
 
 .item-footer:hover {
-    color: #00f2ff;
-    transform: translateY(-3px);
+    color: var(--primary);
+}
+
+.item-footer:hover i {
+    transform: translateY(-2px);
 }
 
 .item-footer.activo {
-    color: #00f2ff;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    box-shadow: 0 4px 14px var(--accent-glow);
 }
 
-/* MENSAJES FLOTANTES */
+.item-footer.activo i {
+    transform: scale(1.05);
+}
 
+/* ==========================
+   TOAST
+========================== */
 .toast-mensaje {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    border-radius: 10px;
+    top: 25px;
+    right: 25px;
+    padding: 14px 22px;
+    border-radius: 12px;
     color: white;
     font-weight: 500;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
     opacity: 0;
     transform: translateY(-20px);
-    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s ease, transform 0.3s ease;
     z-index: 10000;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .toast-mensaje.visible {
@@ -166,9 +467,77 @@
 }
 
 .toast-mensaje.exito {
-    background-color: #28a745; /* verde */
+    background: linear-gradient(135deg, #28a745, #1e7e34);
 }
 
 .toast-mensaje.error {
-    background-color: #dc3545; /* rojo */
+    background: linear-gradient(135deg, #dc3545, #a71d2a);
+}
+
+/* ==========================
+   APLICAR TEMA ANTES DE PINTAR
+   (evita el "flash" de modo claro)
+========================== */
+html.pre-dark body {
+    background: #0f0f1c;
+    color: #ffffff;
+}
+
+/* ==========================
+   BOTÓN DE CAMBIO DE TEMA
+========================== */
+.btn-tema {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--accent);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+    z-index: 1500;
+}
+
+.btn-tema:hover {
+    transform: rotate(20deg) scale(1.08);
+    box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.btn-tema:active {
+    transform: scale(0.95);
+}
+
+
+/* ==========================
+   RESPONSIVE
+========================== */
+@media (max-width: 480px) {
+    .perfil-card {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+
+    .titulo-perfil {
+        font-size: 24px;
+    }
+
+    .foto-perfil {
+        width: 120px;
+        height: 120px;
+    }
+
+    .btn-cambiar-foto {
+        width: 36px;
+        height: 36px;
+    }
 }

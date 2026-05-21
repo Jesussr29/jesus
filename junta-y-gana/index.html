@@ -1,65 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Block Puzzle</title>
     <link rel="stylesheet" href="./css/estilos.css">
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js)"></script>
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css)">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap)" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e2f">
     <link rel="icon" type="image/png" href="./img/ico.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="./img/ico.jpg">
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
 </head>
 
 <body>
-
     <script src="registro-sw.js"></script>
     <script type="module" src="firebase.js"></script>
 
-
-    <!-- Cabecera con vidas y ajustes -->
+    <!-- ==========================
+         CABECERA
+    ========================== -->
     <header id="cabecera">
-        <div id="vidas">
-            <span id="contador-vidas"></span>
-            <span id="nvidas" class="nvidas">5</span>
-            <span id="tiempo-siguiente-vida"></span>
-        </div>
-        <div class="btn-usuario">
-            <button id="btn-ajustes"><i class="fas fa-cog"></i></button>
+        <div class="cabecera-inner">
+            <!-- Logo / título -->
+            <div class="logo-juego">
+                <div class="logo-icon"><i class="fa-solid fa-cubes-stacked"></i></div>
+                <span class="logo-text">Junta<span> y Gana</span></span>
+            </div>
 
+            <!-- Stats: vidas + (futuro: monedas, racha) -->
+            <div class="stats-cabecera">
+                <div id="vidas" class="chip chip-vidas" title="Vidas">
+                    <span id="contador-vidas">❤️</span>
+                    <span id="nvidas" class="nvidas">5</span>
+                    <span id="tiempo-siguiente-vida" class="tiempo-vida"></span>
+                </div>
+
+                <button id="btn-ajustes" class="btn-icono" aria-label="Ajustes">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Contenedor principal -->
+    <!-- ==========================
+         MAIN
+    ========================== -->
     <main>
+        <!-- Banner de bienvenida / progreso -->
+        <section class="hero-progreso">
+            <div class="hero-texto">
+                <h1>Tu aventura</h1>
+                <p>Resuelve, avanza y desbloquea nuevos niveles 🚀</p>
+            </div>
+            <div class="hero-decoracion" aria-hidden="true">
+                <span class="blob blob-1"></span>
+                <span class="blob blob-2"></span>
+                <span class="blob blob-3"></span>
+            </div>
+        </section>
 
         <!-- Camino de niveles -->
-        <div id="camino-niveles">
+        <div id="camino-niveles"></div>
 
-        </div>
-
-
-        <!-- Modal de amigos -->
-
-
-        <!-- Modal de ajustes -->
+        <!-- Modal ajustes -->
         <div id="modal-ajustes">
             <div class="contenido">
-                <h2>Ajustes</h2>
+                <span class="cerrar-ajustes" aria-label="Cerrar">&times;</span>
+                <h2><i class="fa-solid fa-sliders"></i> Ajustes</h2>
+
                 <div class="opcion">
-                    <label for="modo-oscuro">Modo oscuro</label>
-                    <input type="checkbox" id="modo-oscuro">
+                    <div class="opcion-info">
+                        <i class="fa-solid fa-moon"></i>
+                        <label for="modo-oscuro">Modo oscuro</label>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="modo-oscuro">
+                        <span class="slider-switch"></span>
+                    </label>
                 </div>
 
-                <!-- Botón para cerrar sesión -->
-                <button id="btn-cerrar-sesion">Cerrar sesión</button>
-
-                <!-- Botón para cerrar el modal (X arriba a la derecha) -->
-                <span class="cerrar-ajustes">&times;</span>
-
+                <button id="btn-cerrar-sesion">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
             </div>
         </div>
 
@@ -67,48 +94,43 @@
         <div id="modal-bloqueado" class="modal-bloqueado">
             <div class="modal-bloqueado-contenido">
                 <span id="cerrar-modal-bloqueado" class="cerrar-boton">&times;</span>
+                <div class="icono-bloqueado"><i class="fa-solid fa-lock"></i></div>
                 <h2>Nivel Bloqueado</h2>
                 <p>No puedes jugar este nivel aún. ¡Sigue avanzando para desbloquearlo!</p>
-                <button id="cerrar-boton-bloqueado" class="btn-cerrar">Aceptar</button>
+                <button id="cerrar-boton-bloqueado" class="btn-cerrar">Entendido</button>
             </div>
         </div>
 
-        <!-- Modal de notificaciones -->
+        <!-- Modal notificaciones -->
         <div class="modal-notificaciones" id="modalNotificaciones">
             <div class="modal-notificaciones-contenido">
+                <div class="icono-noti"><i class="fa-solid fa-bell"></i></div>
                 <h2>¿Quieres recibir notificaciones?</h2>
-                <p>Activa las notificaciones para recibir alertas sobre tus vidas y novedades del juego 🎮</p>
+                <p>Te avisaremos cuando recuperes vidas y haya novedades 🎮</p>
                 <div class="botones-modal">
-                    <button id="btn-noti-si" class="btn-activar">Sí, activar</button>
-                    <button id="btn-noti-no" class="btn-cancelar">No, gracias</button>
+                    <button id="btn-noti-no" class="btn-cancelar">Ahora no</button>
+                    <button id="btn-noti-si" class="btn-activar">Activar</button>
                 </div>
             </div>
         </div>
 
+        <!-- Footer nav -->
         <footer class="footer-juego" id="footerJuego">
             <a href="#" class="item-footer activo">
                 <i class="fa-solid fa-house"></i>
                 <span>Inicio</span>
             </a>
-
             <a href="./friends.html" class="item-footer">
                 <i class="fa-solid fa-user-group"></i>
                 <span>Amigos</span>
             </a>
-
             <a href="./perfil.html" class="item-footer">
                 <i class="fa-solid fa-user"></i>
                 <span>Perfil</span>
             </a>
         </footer>
-
-
-
     </main>
 
-
     <script src="./js/juego.js"></script>
-
 </body>
-
 </html>

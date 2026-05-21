@@ -4,6 +4,48 @@
 let usuarioServidor = {};
 let usuario = {};
 
+
+// ----------------------
+// Funciones para validar sesión y obtener datos del servidor
+// ----------------------
+
+async function validarSesion() {
+    if (!token) {
+        cerrarSesion();
+        return;
+    }
+
+    try {
+        const res = await fetch("https://jesusweb.ddns.net/juntaygana/usuario", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if (!res.ok) {
+            // Token inválido o expirado
+            cerrarSesion();
+            return;
+        }
+
+        // Token válido → puedes continuar
+        const usuario = await res.json();
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+    } catch (err) {
+        console.error("Error validando sesión:", err);
+        cerrarSesion();
+    }
+}
+
+function cerrarSesion() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    window.location.href = "/junta-y-gana/auth/login.html";
+}
+
+validarSesion();
+
 // ----------------------
 // Función para obtener datos reales del servidor
 // ----------------------
@@ -30,6 +72,11 @@ async function obtenerDatosServidor() {
         usuario.nombre = data.nombre;      // añadir nombre
         usuario.correo = data.email;      // añadir correo
         usuario.foto = data.foto;          // añadir ruta de foto si la hay
+
+        // 👉 AÑADE ESTO
+        document.getElementById("chipNivel").textContent = usuario.nivel;
+        document.getElementById("chipExp").textContent = usuario.experiencia;
+        document.getElementById("chipVidas").textContent = usuarioServidor.vidas;
 
         // Guardar en localStorage
         localStorage.setItem("usuario", JSON.stringify(usuario));
@@ -86,7 +133,7 @@ function cargarPerfilUI() {
     console.log("Ruta de la foto:", usuario.foto);
     if (usuario.foto == "./img/ico.jpg") {
         previewFoto.src = "./img/ico.jpg";
-    }else{
+    } else {
         previewFoto.src = `https://jesusweb.ddns.net${usuario.foto}`;
     }
 
@@ -186,4 +233,54 @@ document.getElementById("form-perfil").addEventListener("submit", (e) => {
     e.preventDefault(); // evitar recarga
     guardarPerfil();
 });
+
+// ----------------------
+// GESTIÓN DEL TEMA (claro / oscuro)
+// ----------------------
+(function inicializarTema() {
+    const body = document.body;
+    const html = document.documentElement;
+
+    // Limpia la clase temporal anti-flash que pusimos en <html>
+    const erapreDark = html.classList.contains("pre-dark");
+    html.classList.remove("pre-dark");
+
+    // Determina el tema inicial: localStorage > preferencia sistema
+    const guardado = localStorage.getItem("tema");
+    const prefiereOscuro = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const temaInicial = guardado || (prefiereOscuro ? "oscuro" : "claro");
+
+    aplicarTema(temaInicial);
+
+    // Listener del botón (cuando exista en el DOM)
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("btnTema");
+        if (!btn) return;
+
+        btn.addEventListener("click", () => {
+            const nuevoTema = body.classList.contains("dark-mode") ? "claro" : "oscuro";
+            aplicarTema(nuevoTema);
+            localStorage.setItem("tema", nuevoTema);
+        });
+    });
+
+    function aplicarTema(tema) {
+        if (tema === "oscuro") {
+            body.classList.add("dark-mode");
+        } else {
+            body.classList.remove("dark-mode");
+        }
+        actualizarIconoTema(tema);
+    }
+
+    function actualizarIconoTema(tema) {
+        const icono = document.getElementById("iconoTema");
+        if (!icono) {
+            // Reintenta cuando el DOM esté listo
+            document.addEventListener("DOMContentLoaded", () => actualizarIconoTema(tema), { once: true });
+            return;
+        }
+        icono.className = tema === "oscuro" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+    }
+})();
 

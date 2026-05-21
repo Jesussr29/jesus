@@ -6,9 +6,42 @@ const listaAmigos = document.getElementById("listaAmigos");
 const token = localStorage.getItem("token");
 
 
-if (!token) {
+async function validarSesion() {
+    if (!token) {
+        cerrarSesion();
+        return;
+    }
+
+    try {
+        const res = await fetch("https://jesusweb.ddns.net/juntaygana/usuario", {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        if (!res.ok) {
+            // Token inválido o expirado
+            cerrarSesion();
+            return;
+        } 
+
+        // Token válido → puedes continuar
+        const usuario = await res.json();
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+    } catch (err) {
+        console.error("Error validando sesión:", err);
+        cerrarSesion();
+    }
+}
+
+function cerrarSesion() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
     window.location.href = "/junta-y-gana/auth/login.html";
 }
+
+validarSesion();
 
 
 btnSolicitudes.addEventListener("click", () => {
@@ -83,7 +116,8 @@ function cargarAmigos() {
 
             // 👉 Ordenar por nivel (mayor primero)
             ranking.sort((a, b) => b.nivel - a.nivel);
-
+            actualizarStatTotalAmigos(amigos.length);
+            actualizarStatTopNivel(ranking);
             // 👉 Pintar ranking
             console.log(ranking);
 
@@ -156,6 +190,37 @@ function eliminarAmigo(amigoId, elementoDiv) {
 
 }
 
+
+// ========================
+// STATS DEL HEADER
+// ========================
+function actualizarStatTotalAmigos(cantidad) {
+    const el = document.getElementById("statTotalAmigos");
+    if (el) el.textContent = cantidad;
+}
+
+function actualizarStatSolicitudes(cantidad) {
+    const el = document.getElementById("statSolicitudes");
+    if (el) el.textContent = cantidad;
+}
+
+function actualizarStatTopNivel(ranking) {
+    const el = document.getElementById("statTopNivel");
+    if (!el) return;
+
+    if (!ranking || ranking.length === 0) {
+        el.textContent = "—";
+        return;
+    }
+
+    // El ranking ya viene ordenado de mayor a menor nivel
+    const top = ranking[0];
+    el.textContent = `Nv. ${top.nivel}`;
+    el.title = `${top.nombre}#${top.tag}`;
+}
+
+
+
 // Cargar amigos al iniciar
 cargarAmigos();
 cargarSolicitudes();
@@ -169,6 +234,8 @@ function cargarSolicitudes() {
     })
         .then(res => res.json())
         .then(data => {
+            // 👉 Stat del header
+            actualizarStatSolicitudes(data.length);
             // Eliminar lista anterior
             const cont = contenedorSolicitudes.querySelector(".solicitudes-lista");
             if (cont) cont.remove();

@@ -1,30 +1,124 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
-  <title>Registro</title>
-  <link rel="stylesheet" href="register.css">
+  <title>Crear Cuenta | Junta y Gana</title>
+  <link rel="stylesheet" href="login.css">
+  <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+  <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600&display=swap)" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
+  <!-- Fondo con imagen del juego -->
+  <div class="background"></div>
+  <div class="overlay"></div>
 
-  <h2>Registrate</h2>
+  <!-- Partículas decorativas -->
+  <div class="particles">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
 
-  <input type="text" id="nombre" placeholder="Nombre">
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button onclick="register()">Registrarse</button>
-  <p class="login-link">
-    ¿Ya estás registrado?
-    <a href="login.html">Inicia sesión</a>
-  </p>
+  <main class="login-wrapper">
+    <!-- Panel izquierdo: branding del juego -->
+    <section class="brand-panel">
+      <div class="brand-content">
+        <div class="logo">
+          <span class="logo-mark">🧩</span>
+          <span class="logo-text">JUNTA<span> Y GANA</span></span>
+        </div>
+        <h1>Únete a la<br><span class="gradient-text">Aventura.</span></h1>
+        <p>Crea tu cuenta gratis y empieza a competir. Sube en el ranking, desafía a tus amigos y demuestra que eres el mejor estratega del tablero.</p>
 
+        <ul class="features">
+          <li><span>◆</span> Registro rápido y 100% gratuito</li>
+          <li><span>◆</span> Personaliza tu perfil y avatar</li>
+          <li><span>◆</span> Desbloquea logros y recompensas únicas</li>
+        </ul>
+      </div>
+    </section>
 
-  <p id="error"></p>
+    <!-- Panel derecho: formulario -->
+    <section class="form-panel">
+      <div class="container">
+        <div class="form-header">
+          <h2>Crear Cuenta</h2>
+          <p>Regístrate gratis y comienza tu primera partida</p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); register();">
+          <div class="input-group">
+            <label for="nombre">Nombre de usuario</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input type="text" id="nombre" placeholder="EstrategaPro" required minlength="3" maxlength="20">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="email">Correo electrónico</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <input type="email" id="email" placeholder="tucorreo@dominio.com" required>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="password">Contraseña</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="password" placeholder="••••••••" required minlength="6">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="confirm-password">Confirmar contraseña</label>
+            <div class="input-wrapper">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="confirm-password" placeholder="••••••••" required minlength="6">
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox">
+              <input type="checkbox" required>
+              <span>Acepto los <a href="#" class="forgot">términos y condiciones</a></span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-login">
+            <span>CREAR CUENTA</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+
+          <p id="error"></p>
+
+          <p class="register-link">
+            ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+          </p>
+        </form>
+      </div>
+    </section>
+  </main>
 
   <script src="auth.js"></script>
 </body>
-
 </html>

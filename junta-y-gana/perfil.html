@@ -1,46 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil</title>
+    <title>Mi Perfil — Junta y Gana</title>
     <link rel="stylesheet" href="./css/perfil.css">
+    <link rel="stylesheet" href="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css)">
+    <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body>
 
     <section class="perfil-container">
 
-        <h2>Mi Perfil</h2>
-
-        <div class="foto-perfil">
-            <img src="./img/ico.jpg" alt="Foto de perfil" id="previewFoto">
-            <label for="inputFoto" class="btn-cambiar-foto">
-                <i class="fa-solid fa-camera"></i>
-            </label>
-            <input type="file" id="inputFoto" hidden>
+        <!-- Cabecera decorativa -->
+        <div class="perfil-header">
+            <div class="header-bg"></div>
+            <h2 class="titulo-perfil">
+                <i class="fa-solid fa-user-astronaut"></i> Mi Perfil
+            </h2>
+            <p class="subtitulo-perfil">Personaliza tu cuenta y mantén tus datos al día</p>
         </div>
 
-        <form class="form-perfil" id="form-perfil">
+        <!-- Tarjeta principal -->
+        <div class="perfil-card">
 
-            <div class="campo">
-                <label>Nombre</label>
-                <input type="text" placeholder="Tu nombre" id="inputNombre">
+            <!-- Foto de perfil -->
+            <div class="foto-perfil">
+                <div class="anillo-foto">
+                    <img src="./img/ico.jpg" alt="Foto de perfil" id="previewFoto">
+                </div>
+                <label for="inputFoto" class="btn-cambiar-foto" title="Cambiar foto">
+                    <i class="fa-solid fa-camera"></i>
+                </label>
+                <input type="file" id="inputFoto" accept="image/*" hidden>
             </div>
 
-            <div class="campo">
-                <label>Correo</label>
-                <input type="email" placeholder="Tu correo" id="inputCorreo">
+            <!-- Info rápida (nivel / experiencia) -->
+            <div class="info-rapida" id="infoRapida">
+                <div class="chip-info">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Nivel <strong id="chipNivel">—</strong></span>
+                </div>
+                <div class="chip-info">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span><strong id="chipExp">—</strong> XP</span>
+                </div>
+                <div class="chip-info">
+                    <i class="fa-solid fa-heart"></i>
+                    <span><strong id="chipVidas">—</strong> Vidas</span>
+                </div>
             </div>
 
-            <button type="submit" class="btn-guardar">
-                <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
-            </button>
+            <!-- Formulario -->
+            <form class="form-perfil" id="form-perfil">
 
-        </form>
+                <div class="campo">
+                    <label for="inputNombre">
+                        <i class="fa-solid fa-id-badge"></i> Nombre
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Tu nombre" id="inputNombre" autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label for="inputCorreo">
+                        <i class="fa-solid fa-envelope"></i> Correo electrónico
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="email" placeholder="tucorreo@ejemplo.com" id="inputCorreo" autocomplete="email">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-guardar">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Guardar cambios</span>
+                </button>
+
+                <button type="button" class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>
+                </button>
+
+            </form>
+
+        </div>
 
     </section>
 
@@ -61,9 +110,8 @@
         </a>
     </footer>
 
+    <script src="./js/perfil.js"></script>
 
 </body>
-
-    <script src="./js/perfil.js"></script>
 
 </html>
